@@ -8,6 +8,7 @@ module DecisionTrees.Learning (
 
   Attribute(..)
 , AttributeContainer(..)
+, AttributeName
 , attrName
 
 , Entry(..)
@@ -16,10 +17,14 @@ module DecisionTrees.Learning (
 ) where
 
 
+newtype AttributeName = AttrName String deriving (Eq, Ord)
+
+instance Show AttributeName where show (AttrName name) = name
+
 class (Show attr) =>
     Attribute attr where
-        possibleDiscreteDomains :: [[attr]]
-        attributeName           :: attr -> String
+        possibleDiscreteDomains :: attr -> [[attr]]
+        attributeName           :: attr -> AttributeName
 
 data AttributeContainer = forall attr . (Attribute attr) => Attr attr
 
@@ -30,9 +35,9 @@ instance Eq AttributeContainer where
 
 instance Ord AttributeContainer where
     x <= y = f x <= f y
-        where f x = map ($ x) [attrName, show]
+        where f x = map ($ x) [show . attrName, show]
 
-attrName (Attr attr) = attributeName attr
+attrName (Attr attr) = show . attributeName $ attr
 --attr2str (Attr attr) = show attr
 
 
@@ -47,6 +52,7 @@ class Entry entry where
 
 class TreeBranching entry where
     selectBestAttrSplitting :: [entry] -> ([AttributeContainer], Float)
+--    splitEntries            :: [entry] -> [AttributeContainer] -> [(AttributeContainer, [entry])]
     splitEntries            :: [entry] -> [AttributeContainer] -> [(AttributeContainer, [entry])]
     finishedSplitting       :: [entry] -> Maybe AttributeContainer
 
