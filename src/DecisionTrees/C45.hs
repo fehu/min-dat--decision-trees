@@ -54,22 +54,24 @@ entropy' ns = sum . map f $ ns
           nSum = int2Float . sum . map sum $ ns
 
 
+
 instance (Entry entry) =>
     TreeBranching entry where
      -- selectBestAttrSplitting :: [entry] -> ([AttributeContainer], Float)
         selectBestAttrSplitting entries = bestSplit
-            where splitEntropy = do (Attr attr) <- listAttributes (head entries)
-                                    attrSplit   <- possibleDiscreteDomains attr
+            where splitByGain = do (Attr attr) <- listAttributes (head entries)
+                                   attrSplit   <- possibleDiscreteDomains attr
 
-                                    let attrSplit' = map Attr attrSplit
-                                    let cc = do (attr', entries') <- splitEntries entries attrSplit'
-                                                return $ countClasses entries'
-                                    return (attrSplit', entropy' $ map Map.elems cc)
-                  bestSplit = maximumBy (compare `on` snd) splitEntropy
+                                   let attrSplit' = map Attr attrSplit
+                                   let cc = do (attr', entries') <- splitEntries entries attrSplit'
+                                               return $ countClasses entries'
+                                   return (attrSplit', gain $ map Map.elems cc)
+                  gain xs   = information' (map sum xs) - entropy' xs
+                  bestSplit = maximumBy (compare `on` snd) splitByGain
 
      -- splitEntries :: [entry] -> [AttributeContainer] -> [(AttributeContainer, [entry])]
         splitEntries entries attrs = sortingGroupBy f id entries
---            where f entry =
+            where f entry = undefined
 
 
 --    finishedSplitting       :: [entry] -> Maybe AttributeContainer
