@@ -17,13 +17,25 @@ module DecisionTrees.Learning (
 ) where
 
 
+import Data.Set (Set)
+
+
+
+
 newtype AttributeName = AttrName String deriving (Eq, Ord)
+
+type PossibleDiscreteDomain attr = [[attr]]
+type AttrValSet = (AttributeName, Set AttributeContainer)
 
 instance Show AttributeName where show (AttrName name) = name
 
+
+
+
+
 class (Show attr) =>
     Attribute attr where
-        possibleDiscreteDomains :: attr -> [[attr]]
+        possibleDiscreteDomains :: attr -> [PossibleDiscreteDomain attr]
         attributeName           :: attr -> AttributeName
 
 data AttributeContainer = forall attr . (Attribute attr) => Attr attr
@@ -37,23 +49,22 @@ instance Ord AttributeContainer where
     x <= y = f x <= f y
         where f x = map ($ x) [show . attrName, show]
 
-attrName (Attr attr) = show . attributeName $ attr
+attrName (Attr attr) = attributeName attr
 --attr2str (Attr attr) = show attr
+
+
 
 
 class Entry entry where
     -- | List the attributes, except class
     listAttributes :: entry -> [AttributeContainer]
     getClass       :: entry -> AttributeContainer
-    attrByName     :: String -> entry -> AttributeContainer
+    attrByName     :: AttributeName -> entry -> AttributeContainer
 
---class AttributesSplitting attr where
---    splitAttribute :: [attr]
 
 class TreeBranching entry where
-    selectBestAttrSplitting :: [entry] -> ([AttributeContainer], Float)
---    splitEntries            :: [entry] -> [AttributeContainer] -> [(AttributeContainer, [entry])]
-    splitEntries            :: [entry] -> [AttributeContainer] -> [(AttributeContainer, [entry])]
-    finishedSplitting       :: [entry] -> Maybe AttributeContainer
+    selectBestAttrSplitting :: [entry] -> ([AttrValSet], Float)
+    splitEntries            :: [entry] -> [AttrValSet] -> [(AttrValSet, [entry])]
+    finishedSplitting       :: [entry] -> Maybe [(AttributeContainer, Int)]
 
 

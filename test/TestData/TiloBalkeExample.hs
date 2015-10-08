@@ -57,9 +57,9 @@ expectedDTree :: Decision Entry String
 expectedDTree =
     DecisionStep { prepare = splitAge . age
                  , describePrepare = "age"
-                 , select = Map.fromList [ ("<=30",   treeAgeYoung)
-                                         , ("31..40", treeAgeMiddle)
-                                         , (">40",    treeAgeSenior)
+                 , select = Map.fromList [ (["<=30"],   treeAgeYoung)
+                                         , (["31..40"], treeAgeMiddle)
+                                         , ([">40"],    treeAgeSenior)
                                          ]
                  }
 

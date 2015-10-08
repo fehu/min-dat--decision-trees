@@ -21,16 +21,17 @@ module DecisionTrees (
 import Data.Tree
 import Data.Map (Map)
 import qualified Data.Map as Map
+import qualified Data.Set as Set
 import Control.Arrow ( (&&&), second )
 
 import DecisionTrees.Learning
 
-data Decision entity decision = forall cond . Show cond =>
+data Decision entity clazz = forall cond . Show cond =>
                                 DecisionStep { prepare :: entity -> cond
-                                             , select  :: Map cond (Decision entity decision)
+                                             , select  :: Map [cond] (Decision entity clazz)
                                              , describePrepare :: String
                                              }
-                              | Decision { decision :: decision }
+                              | Decision { classification :: Map clazz Int }
 
 instance (Show decision) =>
     Show (Decision entity decision)
@@ -52,15 +53,16 @@ buildDecisionTree :: (Entry entry, TreeBranching entry) =>
     [entry] -> Decision entry AttributeContainer
 
 buildDecisionTree entries =
-    case finishedSplitting entries of Just clazz -> Decision clazz
+    case finishedSplitting entries of Just clazz -> Decision (Map.fromList clazz)
                                       _          -> buildStep
-    where buildStep = DecisionStep prepare (Map.fromList next) bestAttr
+    where buildStep = DecisionStep prepare (Map.fromList next) (show bestAttr)
           (best, _) = selectBestAttrSplitting entries
           splitted  = splitEntries entries best
-          bestAttr  = attrName (head best)
+          bestAttr  = fst . head $ best
           prepare   = attrByName bestAttr
-          next = do (attrC, entries') <- splitted
-                    return (attrC, buildDecisionTree entries')
+          next = do (attrVS, entries') <- splitted
+                    let attrCs = Set.toList . snd $ attrVS
+                    return (attrCs, buildDecisionTree entries')
 
 
 

@@ -18,6 +18,7 @@ import Control.Arrow
 import GHC.Float
 import Data.Map (Map)
 import qualified Data.Map as Map
+import qualified Data.Set as Set
 import Data.List (maximumBy)
 import Data.Function (on)
 
@@ -62,15 +63,17 @@ instance (Entry entry) =>
             where splitByGain = do (Attr attr) <- listAttributes (head entries)
                                    attrSplit   <- possibleDiscreteDomains attr
 
-                                   let attrSplit' = map Attr attrSplit
-                                   let cc = do (attr', entries') <- splitEntries entries attrSplit'
+                                   let attrSplitVS = map (\as -> ( attributeName attr
+                                                                 , Set.fromList $ map Attr as)
+                                                         ) attrSplit
+                                   let cc = do (attr', entries') <- splitEntries entries attrSplitVS
                                                return $ countClasses entries'
-                                   return (attrSplit', gain $ map Map.elems cc)
+                                   return (attrSplitVS, gain $ map Map.elems cc)
                   gain xs   = information' (map sum xs) - entropy' xs
                   bestSplit = maximumBy (compare `on` snd) splitByGain
 
-     -- splitEntries :: [entry] -> [AttributeContainer] -> [(AttributeContainer, [entry])]
-        splitEntries entries attrs = sortingGroupBy f id entries
+     -- splitEntries :: [entry] -> [[AttributeContainer]] -> [([AttributeContainer], [entry])]
+        splitEntries entries attrValSets = sortingGroupBy f id entries
             where f entry = undefined
 
 
