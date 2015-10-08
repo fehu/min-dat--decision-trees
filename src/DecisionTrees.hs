@@ -10,11 +10,13 @@
 module DecisionTrees (
 
   Decision(..)
---, DecisionTree
+, DecisionTree
 
---, DecisionBuilding(..)
---, unfoldDecision
---, unfoldDecisions
+, listChildren
+, decision2Tree
+
+, buildDecisionTree
+
 ) where
 
 
@@ -26,12 +28,19 @@ import Control.Arrow ( (&&&), second )
 
 import DecisionTrees.Learning
 
-data Decision entity clazz = forall cond . Show cond =>
-                                DecisionStep { prepare :: entity -> cond
-                                             , select  :: Map [cond] (Decision entity clazz)
-                                             , describePrepare :: String
-                                             }
-                              | Decision { classification :: Map clazz Int }
+
+data Decision entity clazz
+  -- | A decision tree node.
+  = forall cond . Show cond =>
+    DecisionStep { prepare :: entity -> cond                     -- ^ extract a 'cond' for further selection
+                 , select  :: Map [cond] (Decision entity clazz) -- ^ the next nodes; the selection is based on
+                                                                 --   whether a 'cond' is contained in the key.
+                 , describePrepare :: String                     -- ^ a description for 'prepare' transformation.
+                 }
+  -- | A decision tree leaf.
+  | Decision { classification :: Map clazz Int  -- ^ classes and corresponding entities count.
+             }
+
 
 instance (Show decision) =>
     Show (Decision entity decision)
@@ -40,15 +49,17 @@ instance (Show decision) =>
 
 type DecisionTree entity decision = Tree (Decision entity decision)
 
+-- | List children nodes.
 listChildren :: Decision e d -> [Decision e d]
 listChildren (DecisionStep _ sel _) = Map.elems sel
 listChildren (Decision _)           = []
 
+-- | converts a 'Decision' into ('Data.Tree' 'Decision')
 decision2Tree = unfoldTree (id &&& listChildren)
 
+
 -----------------------------------------------------------------------------
-
-
+-- | build a decision tree, using the imported instance of 'TreeBranching'
 buildDecisionTree :: (Entry entry, TreeBranching entry) =>
     [entry] -> Decision entry AttributeContainer
 
@@ -65,36 +76,3 @@ buildDecisionTree entries =
                     return (attrCs, buildDecisionTree entries')
 
 
-
---data DecisionBuilding e d = forall cond . (Show cond, Ord cond) =>
---    DecisionBuilding { buildThis :: (e -> cond, String)
---                     , buildNext :: [(cond, DecisionBuilding e d)]
---                     }
---  | DecisionBuilt d
---
---unfoldDecision :: (DecisionBuilding e d -> DecisionBuilding e d) -> DecisionBuilding e d -> Decision e d
---unfoldDecision f b = case f b of DecisionBuilt d              -> Decision d
---                                 DecisionBuilding bThis bNext -> DecisionStep (fst bThis) next (snd bThis)
---                                    where next = unfoldDecisions f bNext
---
---unfoldDecisions :: (Ord cond) =>
---    (DecisionBuilding e d -> DecisionBuilding e d) -> [(cond, DecisionBuilding e d)] -> Map cond (Decision e d)
---unfoldDecisions f bs = Map.fromList $ map (second (unfoldDecision f)) bs
-
--- :: (b -> (a, [b])) -> [b] -> Forest a
--- f = map (unfoldTree f)
-
---unfoldDecision :: (b -> (Decision e d, [b])) -> b -> Decision e d
---unfoldDecision f b = undefined
---    where (decision, childrenSeeds) = f b
-
---unfoldDecision f b = let (a, bs) = f b in Node a (unfoldForest f bs)
-
---d :: Decision String String
---d = DecisionStep { prepare = length
---                 , select "a" = undefined
---                 }
-
-
-
---data Tree entiry prev this next = Root (entiry -> this) (this -> Bool) [Tree entity this next ?]
