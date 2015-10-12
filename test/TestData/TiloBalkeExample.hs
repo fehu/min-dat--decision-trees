@@ -19,7 +19,7 @@ import qualified Data.Map as Map
 
 data CreditRating = Fair
                   | Excellent
-              deriving (Show, Eq)
+              deriving (Show, Eq, Ord)
 
 data Entry = Entry{ age         :: Int
                   , income      :: String
@@ -53,7 +53,7 @@ splitAge age | age <= 30 = "<=30"
 
 
 
-expectedDTree :: Decision Entry String
+expectedDTree :: Decision Entry Bool
 expectedDTree =
     DecisionStep { prepare = splitAge . age
                  , describePrepare = "age"
@@ -64,7 +64,25 @@ expectedDTree =
                  }
 
 
-treeAgeYoung  = undefined
-treeAgeMiddle = undefined
-treeAgeSenior = undefined
+treeAgeYoung  = DecisionStep { prepare = student
+                             , describePrepare = "student?"
+                             , select = Map.fromList [ ([True],  treeYoungStudent)
+                                                     , ([False], treeYoungNotStudent)
+                                                     ]
+                             }
+treeYoungStudent    = Decision { classification = Map.fromList [(False, 3)]  }
+treeYoungNotStudent = Decision { classification = Map.fromList [(True, 2)] }
+
+
+treeAgeMiddle = Decision { classification = Map.fromList [(True, 4)] }
+
+
+treeAgeSenior = DecisionStep { prepare = credRating
+                             , describePrepare = "credit rating"
+                             , select = Map.fromList [ ([Fair],      treeSeniorFair)
+                                                     , ([Excellent], treeSeniorExcellent)
+                                                     ]
+                             }
+treeSeniorFair      = Decision $ Map.fromList [(False, 2)]
+treeSeniorExcellent = Decision $ Map.fromList [(True, 3)]
 
