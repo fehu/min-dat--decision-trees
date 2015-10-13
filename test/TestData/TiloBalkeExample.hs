@@ -11,50 +11,98 @@
 
 module TestData.TiloBalkeExample (
 
+  Entry(..)
+, CreditRating(..)
+
+, testData
+, expectedDecision
+
+--, splitAge
 ) where
 
 import DecisionTrees
+import qualified DecisionTrees.Learning as L
 
 import qualified Data.Map as Map
 
-data CreditRating = Fair
-                  | Excellent
-              deriving (Show, Eq, Ord)
+newtype Age = Age Int                deriving (Show, Eq, Ord)
+newtype Income = Income String       deriving (Show, Eq, Ord)
+newtype Student = Student Bool       deriving (Show, Eq, Ord)
+data CreditRating = Fair | Excellent deriving (Show, Eq, Ord)
+data BuysComputer = Yes  | No        deriving (Show, Eq, Ord)
 
-data Entry = Entry{ age         :: Int
-                  , income      :: String
-                  , student     :: Bool
+data Entry = Entry{ age         :: Age
+                  , income      :: Income
+                  , student     :: Student
                   , credRating  :: CreditRating
-                  , buysComp    :: Bool
+                  , buysComp    :: BuysComputer
                   }
               deriving (Show, Eq)
 
+instance L.Attribute Age where
+    possibleDiscreteDomains _ = [
+       [ map Age [0..30], map Age [31..40], map Age [40..] ] -- TODO not the best implementation
+     ]
+    attributeName _ = L.AttrName "age"
+
+instance L.Attribute Income where
+    possibleDiscreteDomains _ = [ [ [Income "high"], [Income "medium"], [Income "low"] ] ]
+    attributeName _ = L.AttrName "income"
+
+instance L.Attribute Student where
+    possibleDiscreteDomains _ = [ [ [Student True], [Student False] ] ]
+    attributeName _ = L.AttrName "student"
+
+instance L.Attribute CreditRating where
+    possibleDiscreteDomains _ = [ [ [Fair], [Excellent] ] ]
+    attributeName _ = L.AttrName "credit rating"
+
+instance L.Attribute BuysComputer where
+    possibleDiscreteDomains _ = [ [ [Yes], [No] ] ]
+    attributeName _ = L.AttrName "buys computer"
+
+instance L.Entry Entry where
+    -- entry -> [AttributeContainer]
+    listAttributes entry = map ($ entry) [
+       L.Attr . age
+     , L.Attr . income
+     , L.Attr . student
+     , L.Attr . credRating
+     ]
+    getClass = L.Attr . buysComp
+    attrByName (L.AttrName name) =
+        case name of "age"    -> L.Attr . age
+                     "income" -> L.Attr . income
+
+newEntry age income student= Entry (Age age) (Income income) (Student student)
+
+
 testData :: [Entry]
 testData = [
-   Entry 25 "high"   False Fair      False
- , Entry 27 "high"   False Excellent False
- , Entry 35 "high"   False Fair      True
- , Entry 42 "medium" False Excellent True
- , Entry 52 "low"    True  Excellent True
- , Entry 45 "low"    True  Fair      False
- , Entry 31 "low"    True  Excellent True
- , Entry 29 "medium" False Fair      False
- , Entry 22 "low"    True  Fair      True
- , Entry 42 "medium" True  Excellent True
- , Entry 30 "medium" True  Excellent True
- , Entry 36 "medium" False Excellent True
- , Entry 33 "high"   True  Fair      True
- , Entry 50 "medium" False Fair      False
+   newEntry 25 "high"   False Fair      No
+ , newEntry 27 "high"   False Excellent No
+ , newEntry 35 "high"   False Fair      Yes
+ , newEntry 42 "medium" False Excellent Yes
+ , newEntry 52 "low"    True  Excellent Yes
+ , newEntry 45 "low"    True  Fair      No
+ , newEntry 31 "low"    True  Excellent Yes
+ , newEntry 29 "medium" False Fair      No
+ , newEntry 22 "low"    True  Fair      Yes
+ , newEntry 42 "medium" True  Excellent Yes
+ , newEntry 30 "medium" True  Excellent Yes
+ , newEntry 36 "medium" False Excellent Yes
+ , newEntry 33 "high"   True  Fair      Yes
+ , newEntry 50 "medium" False Fair      No
  ]
 
-splitAge age | age <= 30 = "<=30"
-             | age >  40 = ">40"
-             | otherwise = "31..40"
+splitAge (Age age) | age <= 30 = "<=30"
+                   | age >  40 = ">40"
+                   | otherwise = "31..40"
 
 
 
-expectedDTree :: Decision Entry Bool
-expectedDTree =
+expectedDecision :: Decision Entry Bool
+expectedDecision =
     DecisionStep { prepare = splitAge . age
                  , describePrepare = "age"
                  , select = Map.fromList [ (["<=30"],   treeAgeYoung)
@@ -66,8 +114,8 @@ expectedDTree =
 
 treeAgeYoung  = DecisionStep { prepare = student
                              , describePrepare = "student?"
-                             , select = Map.fromList [ ([True],  treeYoungStudent)
-                                                     , ([False], treeYoungNotStudent)
+                             , select = Map.fromList [ ([Student True],  treeYoungStudent)
+                                                     , ([Student False], treeYoungNotStudent)
                                                      ]
                              }
 treeYoungStudent    = Decision { classification = Map.fromList [(False, 3)]  }

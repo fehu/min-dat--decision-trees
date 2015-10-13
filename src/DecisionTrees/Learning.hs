@@ -8,7 +8,7 @@ module DecisionTrees.Learning (
 
   Attribute(..)
 , AttributeContainer(..)
-, AttributeName
+, AttributeName(..)
 , attrName
 
 , Entry(..)

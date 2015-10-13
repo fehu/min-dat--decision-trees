@@ -72,12 +72,19 @@ instance (Entry entry) =>
                   gain xs   = information' (map sum xs) - entropy' xs
                   bestSplit = maximumBy (compare `on` snd) splitByGain
 
-     -- splitEntries :: [entry] -> [[AttributeContainer]] -> [([AttributeContainer], [entry])]
-        splitEntries entries attrValSets = sortingGroupBy f id entries
-            where f entry = undefined
+     -- splitEntries :: [entry] -> [AttrValSet] -> [(AttrValSet, [entry])]
+        splitEntries entries attrValSets =
+            do set@(attrName, attrValSet) <- attrValSets
+               let entries' = filter (\entry -> attrByName attrName entry `Set.member` attrValSet) entries
+               return (set, entries')
 
-
---    finishedSplitting       :: [entry] -> Maybe AttributeContainer
+     -- finishedSplitting :: [entry] -> Maybe [(AttributeContainer, Int)]
+        finishedSplitting entries =
+            case sortingGroupBy getClass length entries of [(clazz, c)] -> Just [(clazz, c)]
+                                                           _            -> Nothing
+--      TODO
+--            where classCount = sortingGroupBy getClass length entries
+--                  (classMax, classMaxCoint) = maximumBy (compare `on` snd) classCount
 
 countClasses :: (Entry entry) => [entry] -> Map AttributeContainer Int
 countClasses = Map.fromList . sortingGroupBy getClass length

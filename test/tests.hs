@@ -5,6 +5,7 @@ module Main (
 import Test.Hspec
 
 import TestData.TiloBalkeExample
+import DecisionTreesSpec
 
 
 main :: IO ()
