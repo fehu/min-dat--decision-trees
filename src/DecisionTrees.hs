@@ -77,11 +77,12 @@ buildDecisionTree' entries ignore selDescr =
     case finishedSplitting entries of Just clazz -> return $ Decision (Map.fromList clazz) selDescr
                                       _          -> buildStep
     where buildStep = do nxt <- sequence next
-                         putStrLn "buildStep"
+--                         putStrLn "buildStep"
                          putStrLn $ "best = " ++ show best
-                         putStrLn $ "splitted = " ++ show splitted
+                         putStrLn $ "v = " ++ show v ++ "\n"
+--                         putStrLn $ "splitted = " ++ show splitted
                          return $ DecisionStep prepare (Map.fromList nxt) (show bestAttr) selDescr
-          (best, _) = selectBestAttrSplitting entries ignore
+          (best, v) = selectBestAttrSplitting entries ignore
           splitted  = splitEntries entries best
           bestAttr  = fst . head $ best
           prepare   = attrByName bestAttr
@@ -89,8 +90,8 @@ buildDecisionTree' entries ignore selDescr =
                     let attrCs = Set.toList . snd $ attrVS
                     let nextSel = Just $ show attrCs
                     return $ do tr <- buildDecisionTree' entries' (Set.insert bestAttr ignore) nextSel
-                                putStrLn $ "next: attrVS = " ++ show attrVS
-                                putStrLn $ "entries' = " ++ show entries'
+--                                putStrLn $ "next: attrVS = " ++ show attrVS
+--                                putStrLn $ "entries' = " ++ show entries'
                                 return (attrCs, tr)
 
 

@@ -9,6 +9,7 @@ module DecisionTrees.Learning (
   Attribute(..)
 , AttributeContainer(..)
 , AttributeName(..)
+, AttrValSet
 
 , Entry(..)
 , TreeBranching(..)
@@ -65,6 +66,7 @@ class (Show entry) =>
         -- | List the attributes, except class
         listAttributes :: entry -> [AttributeContainer]
         getClass       :: entry -> AttributeContainer
+        classDomain    :: entry -> Set AttributeContainer
         attrByName     :: AttributeName -> entry -> AttributeContainer
 
 
@@ -75,5 +77,6 @@ class TreeBranching entry where
                             -> ([AttrValSet], Float) -- ^ best splitting
     splitEntries            :: [entry] -> [AttrValSet] -> [(AttrValSet, [entry])]
     finishedSplitting       :: [entry] -> Maybe [(AttributeContainer, Int)]
+
 
 

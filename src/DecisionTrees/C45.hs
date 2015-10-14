@@ -22,10 +22,11 @@ import GHC.Float
 import Data.Map (Map)
 import qualified Data.Map as Map
 import qualified Data.Set as Set
-import Data.List (maximumBy, transpose)
+import Data.List (maximumBy, transpose, sortBy)
 import Data.Function (on)
 
 import DecisionTrees.Learning
+import DecisionTrees.Learning.Debug
 import DecisionTrees.Utils
 
 
@@ -50,9 +51,11 @@ entropy = entropy' . map (\x -> map ($ x) [fst, snd])
 
 
 information' :: [Int] -> Float
-information' ns | 0 `elem` ns = 0
-                | otherwise   = sum $ map f ns
-    where f x    = - uncurry (*) ((id &&& logBase 2 ) (frac x))
+information' ns = sum $ map f ns
+-- | 0 `elem` ns = 0
+--                | otherwise   = sum $ map f ns
+    where f 0    = 0
+          f x    = - uncurry (*) ((id &&& logBase 2 ) (frac x))
           frac x = int2Float x / nSum
           nSum   = int2Float $ sum ns
 
@@ -70,21 +73,8 @@ gain' xs = information' (map sum $ transpose xs) - entropy' xs
 
 instance (Entry entry) =>
     TreeBranching entry where
-     -- selectBestAttrSplitting :: [entry] -> ([AttributeContainer], Float)
-        selectBestAttrSplitting entries except = bestSplit
-            where splitByGain = do (Attr attr) <- listAttributes (head entries)
-                                   attrSplit   <- possibleDiscreteDomains attr
-
-                                   let attrSplitVS = map (\as -> ( attributeName attr
-                                                                 , Set.fromList $ map Attr as)
-                                                         ) attrSplit
-                                   let cc = do (attr', entries') <- splitEntries entries attrSplitVS
-                                               if fst attr' `Set.notMember` except
-                                                then return $ countClasses entries'
-                                                else []
-                                   return (attrSplitVS, gain' $ map Map.elems cc)
---                  gain xs   = information' (map sum xs) - entropy' xs
-                  bestSplit = maximumBy (compare `on` snd) splitByGain
+     -- selectBestAttrSplitting :: [entry] -> Set AttributeName -> ([AttrValSet], Float)
+        selectBestAttrSplitting entries = fst . head . selectBestAttrSplitting' entries
 
      -- splitEntries :: [entry] -> [AttrValSet] -> [(AttrValSet, [entry])]
         splitEntries entries attrValSets =
@@ -101,7 +91,36 @@ instance (Entry entry) =>
 --            where classCount = sortingGroupBy getClass length entries
 --                  (classMax, classMaxCoint) = maximumBy (compare `on` snd) classCount
 
-countClasses :: (Entry entry) => [entry] -> Map AttributeContainer Int
-countClasses = Map.fromList . sortingGroupBy getClass length
+instance (Entry entry) =>
+    TreeBranchingDebug entry where
+        selectBestAttrSplitting' entries except = sortSplit
+            where splitByGain = do (Attr attr) <- listAttributes (head entries)
+                                   attrSplit   <- possibleDiscreteDomains attr
+
+                                   let attrSplitVS = map (\as -> ( attributeName attr
+                                                                 , Set.fromList $ map Attr as)
+                                                         ) attrSplit
+                                   let cc = do (attr', entries') <- splitEntries entries attrSplitVS
+                                               return $ countClasses entries'
+--                                               if fst attr' `Set.notMember` except
+--                                                then return $ countClasses attr' entries'
+--                                                else []
+                                   let c = map (map snd) cc
+
+                                   if (fst . head $ attrSplitVS) `Set.notMember` except
+                                    then return ((attrSplitVS, gain' c), cc)
+                                    else []
+--                  gain xs   = information' (map sum xs) - entropy' xs
+--                  sortSplit = sortBy (compare `on` snd) splitByGain
+                  sortSplit = sortBy (compare `on` (negate . snd . fst)) splitByGain
+
+--countClasses :: (Entry entry) => [entry] -> Map AttributeContainer Int
+--countClasses = Map.fromList . sortingGroupBy getClass length
+
+countClasses :: (Entry entry) => [entry] -> [(AttributeContainer, Int)]
+countClasses entries = sortBy (compare `on` fst) $ Map.assocs mp
+    where entry = head entries  -- TODO dangerous
+          mp = Map.union (Map.fromList . sortingGroupBy getClass length $ entries)
+                         (Map.fromSet (const 0) $ classDomain entry)
 
 

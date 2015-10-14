@@ -29,6 +29,7 @@ library
                       , containers > 0.5
   exposed-modules:      DecisionTrees
                         DecisionTrees.Learning
+                        DecisionTrees.Learning.Debug
                         DecisionTrees.C45
                         DecisionTrees.Utils
   -- other-modules:

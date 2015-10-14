@@ -29,6 +29,7 @@ import DecisionTrees
 import qualified DecisionTrees.Learning as L
 
 import qualified Data.Map as Map
+import qualified Data.Set as Set
 import Control.Applicative
 import Data.Typeable
 
@@ -104,6 +105,7 @@ instance L.Entry Entry where
      , L.Attr . credRating
      ]
     getClass = L.Attr . buysComp
+    classDomain _ = Set.fromList [L.Attr Yes, L.Attr No]
     attrByName (L.AttrName name) =
         case name of "age"           -> L.Attr . age
                      "income"        -> L.Attr . income
