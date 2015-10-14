@@ -75,7 +75,7 @@ data Entry = Entry{ age         :: Age
 
 instance L.Attribute Age where
     possibleDiscreteDomains _ = [
-       [ [AgeRange Nothing (Just 30)], [AgeRange (Just 31) (Just 40)],[ AgeRange (Just 40) Nothing] ] -- TODO not the best implementation
+       [ [AgeRange Nothing (Just 30)], [AgeRange (Just 31) (Just 40)],[ AgeRange (Just 41) Nothing] ] -- TODO not the best implementation
      ]
     attributeName _ = L.AttrName "age"
 

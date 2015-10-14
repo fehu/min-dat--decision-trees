@@ -11,6 +11,9 @@ module DecisionTrees.C45 (
   information
 , information'
 , entropy
+, entropy'
+, gain
+, gain'
 
 ) where
 
@@ -19,7 +22,7 @@ import GHC.Float
 import Data.Map (Map)
 import qualified Data.Map as Map
 import qualified Data.Set as Set
-import Data.List (maximumBy)
+import Data.List (maximumBy, transpose)
 import Data.Function (on)
 
 import DecisionTrees.Learning
@@ -27,24 +30,28 @@ import DecisionTrees.Utils
 
 
 information :: Int -> Int -> Float
-information p n = f pf + f nf
-    where f x = - uncurry (*) ((id &&& logBase 2 ) x)
-          pf = int2Float p / (int2Float p + int2Float n)
-          nf = int2Float n / (int2Float p + int2Float n)
+information x y = information' [x, y]
+
+--information p n = f pf + f nf
+--    where f x = - uncurry (*) ((id &&& logBase 2 ) x)
+--          pf = int2Float p / (int2Float p + int2Float n)
+--          nf = int2Float n / (int2Float p + int2Float n)
 
 entropy :: [(Int, Int)] -> Float
-entropy subs = sum entr
-    where entr = do (p, n) <- subs
-                    let frac = int2Float (p+n) / totalFl
-                    return $ frac * information p n
-          totalP = sum $ map fst subs
-          totalN = sum $ map snd subs
-          totalFl = int2Float (totalP + totalN)
+entropy = entropy' . map (\x -> map ($ x) [fst, snd])
+--entropy subs = sum entr
+--    where entr = do (p, n) <- subs
+--                    let frac = int2Float (p+n) / totalFl
+--                    return $ frac * information p n
+--          totalP = sum $ map fst subs
+--          totalN = sum $ map snd subs
+--          totalFl = int2Float (totalP + totalN)
 
 
 
 information' :: [Int] -> Float
-information' ns = sum $ map f ns
+information' ns | 0 `elem` ns = 0
+                | otherwise   = sum $ map f ns
     where f x    = - uncurry (*) ((id &&& logBase 2 ) (frac x))
           frac x = int2Float x / nSum
           nSum   = int2Float $ sum ns
@@ -55,6 +62,11 @@ entropy' ns = sum . map f $ ns
           nSum = int2Float . sum . map sum $ ns
 
 
+gain :: [(Int, Int)] -> Float
+gain = gain' . map (\x -> map ($ x) [fst, snd])
+
+gain' :: [[Int]] -> Float
+gain' xs = information' (map sum $ transpose xs) - entropy' xs
 
 instance (Entry entry) =>
     TreeBranching entry where
@@ -70,13 +82,9 @@ instance (Entry entry) =>
                                                if fst attr' `Set.notMember` except
                                                 then return $ countClasses entries'
                                                 else []
-                                   return (attrSplitVS, gain $ map Map.elems cc)
-                  gain xs   = information' (map sum xs) - entropy' xs
+                                   return (attrSplitVS, gain' $ map Map.elems cc)
+--                  gain xs   = information' (map sum xs) - entropy' xs
                   bestSplit = maximumBy (compare `on` snd) splitByGain
-
---                  bestSplit = maximumBy (compare `on` snd) splitByGain
-
---                  filter ((`Set.member` except) . fst)
 
      -- splitEntries :: [entry] -> [AttrValSet] -> [(AttrValSet, [entry])]
         splitEntries entries attrValSets =
