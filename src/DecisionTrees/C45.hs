@@ -59,7 +59,7 @@ entropy' ns = sum . map f $ ns
 instance (Entry entry) =>
     TreeBranching entry where
      -- selectBestAttrSplitting :: [entry] -> ([AttributeContainer], Float)
-        selectBestAttrSplitting entries = bestSplit
+        selectBestAttrSplitting entries except = bestSplit
             where splitByGain = do (Attr attr) <- listAttributes (head entries)
                                    attrSplit   <- possibleDiscreteDomains attr
 
@@ -67,10 +67,16 @@ instance (Entry entry) =>
                                                                  , Set.fromList $ map Attr as)
                                                          ) attrSplit
                                    let cc = do (attr', entries') <- splitEntries entries attrSplitVS
-                                               return $ countClasses entries'
+                                               if fst attr' `Set.notMember` except
+                                                then return $ countClasses entries'
+                                                else []
                                    return (attrSplitVS, gain $ map Map.elems cc)
                   gain xs   = information' (map sum xs) - entropy' xs
                   bestSplit = maximumBy (compare `on` snd) splitByGain
+
+--                  bestSplit = maximumBy (compare `on` snd) splitByGain
+
+--                  filter ((`Set.member` except) . fst)
 
      -- splitEntries :: [entry] -> [AttrValSet] -> [(AttrValSet, [entry])]
         splitEntries entries attrValSets =
@@ -79,9 +85,10 @@ instance (Entry entry) =>
                return (set, entries')
 
      -- finishedSplitting :: [entry] -> Maybe [(AttributeContainer, Int)]
-        finishedSplitting entries =
-            case sortingGroupBy getClass length entries of [(clazz, c)] -> Just [(clazz, c)]
-                                                           _            -> Nothing
+        finishedSplitting entries | null classes        = Just []
+                                  | length classes == 1 = Just classes
+                                  | otherwise           = Nothing
+            where classes = sortingGroupBy getClass length entries
 --      TODO
 --            where classCount = sortingGroupBy getClass length entries
 --                  (classMax, classMaxCoint) = maximumBy (compare `on` snd) classCount

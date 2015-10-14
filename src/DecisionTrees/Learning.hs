@@ -9,7 +9,6 @@ module DecisionTrees.Learning (
   Attribute(..)
 , AttributeContainer(..)
 , AttributeName(..)
-, attrName
 
 , Entry(..)
 , TreeBranching(..)
@@ -18,6 +17,7 @@ module DecisionTrees.Learning (
 
 
 import Data.Set (Set)
+import Data.Typeable
 
 
 
@@ -38,32 +38,41 @@ class (Show attr) =>
         possibleDiscreteDomains :: attr -> [PossibleDiscreteDomain attr]
         attributeName           :: attr -> AttributeName
 
-data AttributeContainer = forall attr . (Attribute attr) => Attr attr
+-- http://stackoverflow.com/questions/13015949/testing-equality-between-two-heterogeneous-values
+data AttributeContainer = forall attr . (Attribute attr, Typeable attr, Ord attr) => Attr attr
 
 instance Show AttributeContainer where show (Attr attr) = show attr
 
 instance Eq AttributeContainer where
-    x == y = attrName x == attrName y && show x == show y
+    (Attr x) == (Attr y) =
+        case cast y of Just y' -> x == y'
+                       Nothing -> False
 
 instance Ord AttributeContainer where
-    x <= y = f x <= f y
-        where f x = map ($ x) [show . attrName, show]
+    (Attr x) `compare` (Attr y) =
+        case cast y of Just y' -> x `compare` y'
+                       Nothing -> let c = attributeName x `compare` attributeName y
+                                  in case c of EQ -> error "EQ"
+                                               _  -> c
 
-attrName (Attr attr) = attributeName attr
---attr2str (Attr attr) = show attr
+attrName       (Attr attr) = attributeName attr
 
 
 
 
-class Entry entry where
-    -- | List the attributes, except class
-    listAttributes :: entry -> [AttributeContainer]
-    getClass       :: entry -> AttributeContainer
-    attrByName     :: AttributeName -> entry -> AttributeContainer
+class (Show entry) =>
+    Entry entry where
+        -- | List the attributes, except class
+        listAttributes :: entry -> [AttributeContainer]
+        getClass       :: entry -> AttributeContainer
+        attrByName     :: AttributeName -> entry -> AttributeContainer
 
 
 class TreeBranching entry where
-    selectBestAttrSplitting :: [entry] -> ([AttrValSet], Float)
+    -- | select best attributes splitting
+    selectBestAttrSplitting :: [entry]               -- ^ select from
+                            -> Set AttributeName     -- ^ except given attributes
+                            -> ([AttrValSet], Float) -- ^ best splitting
     splitEntries            :: [entry] -> [AttrValSet] -> [(AttrValSet, [entry])]
     finishedSplitting       :: [entry] -> Maybe [(AttributeContainer, Int)]
 

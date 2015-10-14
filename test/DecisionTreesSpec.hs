@@ -21,14 +21,17 @@ module DecisionTreesSpec (
 import DecisionTrees
 import DecisionTrees.C45
 import TestData.TiloBalkeExample
+import Data.Tree
 
 
 
 --spec :: Spec
 --spec = undefined
 
-run = print x
-    where x = buildDecisionTree testData
+run = do x <- buildDecisionTree testData
+         let tr = decision2Tree show x
+         putStrLn ""
+         putStrLn $ drawTree tr
 
 
 
