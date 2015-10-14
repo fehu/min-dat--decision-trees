@@ -21,6 +21,7 @@ module DecisionTrees (
 
 
 import Data.Tree
+import Data.Typeable
 import Data.Map (Map)
 import Data.Set (Set)
 import qualified Data.Map as Map
@@ -32,7 +33,7 @@ import DecisionTrees.Learning
 
 data Decision entity clazz
   -- | A decision tree node.
-  = forall cond . Show cond =>
+  = forall cond . (Show cond, Ord cond) =>
     DecisionStep { prepare :: entity -> cond                     -- ^ extract a 'cond' for further selection
                  , select  :: Map [cond] (Decision entity clazz) -- ^ the next nodes; the selection is based on
                                                                  --   whether a 'cond' is contained in the key.
@@ -78,8 +79,8 @@ buildDecisionTree' entries ignore selDescr =
                                       _          -> buildStep
     where buildStep = do nxt <- sequence next
 --                         putStrLn "buildStep"
-                         putStrLn $ "best = " ++ show best
-                         putStrLn $ "v = " ++ show v ++ "\n"
+--                         putStrLn $ "best = " ++ show best
+--                         putStrLn $ "v = " ++ show v ++ "\n"
 --                         putStrLn $ "splitted = " ++ show splitted
                          return $ DecisionStep prepare (Map.fromList nxt) (show bestAttr) selDescr
           (best, v) = selectBestAttrSplitting entries ignore

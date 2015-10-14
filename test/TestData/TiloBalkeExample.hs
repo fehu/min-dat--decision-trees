@@ -133,20 +133,24 @@ testData = [
  , newEntry 50 "medium" False Fair      No
  ]
 
-splitAge (Age age) | age <= 30 = "<=30"
-                   | age >  40 = ">40"
-                   | otherwise = "31..40"
+splitAge (Age age) | age <= 30 = AgeRange Nothing   (Just 30)
+                   | age >  40 = AgeRange Nothing   (Just 30)
+                   | otherwise = AgeRange (Just 31) (Just 40)
 
 
+tTrue  = L.Attr Yes
+tFalse = L.Attr No
 
-expectedDecision :: Decision Entry Bool
+
+expectedDecision :: Decision Entry L.AttributeContainer
 expectedDecision =
     DecisionStep { prepare = splitAge . age
                  , describePrepare = "age"
-                 , select = Map.fromList [ (["<=30"],   treeAgeYoung)
-                                         , (["31..40"], treeAgeMiddle)
-                                         , ([">40"],    treeAgeSenior)
+                 , select = Map.fromList [ ([AgeRange Nothing   (Just 30)], treeAgeYoung)
+                                         , ([AgeRange (Just 31) (Just 40)], treeAgeMiddle)
+                                         , ([AgeRange (Just 41)  Nothing ], treeAgeSenior)
                                          ]
+                 , describeSelect = Nothing
                  }
 
 
@@ -155,12 +159,15 @@ treeAgeYoung  = DecisionStep { prepare = student
                              , select = Map.fromList [ ([Student True],  treeYoungStudent)
                                                      , ([Student False], treeYoungNotStudent)
                                                      ]
+                             , describeSelect = Just "young age"
                              }
-treeYoungStudent    = Decision { classification = Map.fromList [(False, 3)]  }
-treeYoungNotStudent = Decision { classification = Map.fromList [(True, 2)] }
+treeYoungStudent    = Decision { classification = Map.fromList [(tTrue , 2)] , describeSelect = Just "student" }
+treeYoungNotStudent = Decision { classification = Map.fromList [(tFalse, 3)] , describeSelect = Just "not student" }
 
 
-treeAgeMiddle = Decision { classification = Map.fromList [(True, 4)] }
+treeAgeMiddle = Decision { classification = Map.fromList [(tTrue, 4)]
+                         , describeSelect = Just "middle age"
+                         }
 
 
 treeAgeSenior = DecisionStep { prepare = credRating
@@ -168,7 +175,8 @@ treeAgeSenior = DecisionStep { prepare = credRating
                              , select = Map.fromList [ ([Fair],      treeSeniorFair)
                                                      , ([Excellent], treeSeniorExcellent)
                                                      ]
+                             , describeSelect = Just "senior age"
                              }
-treeSeniorFair      = Decision (Map.fromList [(False, 2)]) (Just "Fair")
-treeSeniorExcellent = Decision (Map.fromList [(True, 3)])  (Just "Excellent")
+treeSeniorFair      = Decision (Map.fromList [(tFalse, 2)]) (Just "Fair")
+treeSeniorExcellent = Decision (Map.fromList [(tTrue, 3)])  (Just "Excellent")
 
