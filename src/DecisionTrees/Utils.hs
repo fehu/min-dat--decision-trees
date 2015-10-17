@@ -9,12 +9,15 @@ module DecisionTrees.Utils (
 
   preservingArg
 , sortingGroupBy
+, fullSubsets
 
 ) where
 
 import Control.Arrow ((&&&))
 import Data.List
 import Data.Function
+import qualified Data.Set as Set
+import Data.Set (Set)
 
 -- I guess in Haskell should already exist a way to do it,
 -- but I don't know it
@@ -36,3 +39,18 @@ sortingGroupBy :: (Ord b) => (a -> b)   -- ^ /discriminator function/
 sortingGroupBy f g = map (f . head &&& g)
                          . groupBy ((==) `on` f)
                          . sortBy (compare `on` f)
+
+
+-- | returns a set of all possible /full sets of subsets/ of the given set.
+-- | @x@ is a /full sets of subsets/ of @y@ iff @Set.unions x == y@.
+fullSubsets :: (Ord a) => Set a -> Set (Set (Set a))
+fullSubsets s
+    | Set.size s == 1 = Set.singleton $ Set.singleton s
+    | otherwise = Set.unions $ sss:nxt
+        where nxt = do e <- Set.toList s
+                       let s' = Set.delete e s
+                       let ss = fullSubsets s'
+                       let se = Set.singleton e
+                       return $ Set.map (Set.insert se) ss
+              sss = Set.singleton (Set.singleton s)
+
