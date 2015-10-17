@@ -25,8 +25,9 @@ import qualified Data.Set as Set
 import Data.List (maximumBy, transpose, sortBy)
 import Data.Function (on)
 
-import DecisionTrees.Learning
-import DecisionTrees.Learning.Debug
+import DecisionTrees.Definitions
+import DecisionTrees.TreeBranching
+import DecisionTrees.TreeBranching.Debug
 import DecisionTrees.Utils
 
 

@@ -1,10 +1,14 @@
 -- |
 --
--- Module      :  DecisionTrees.Learning
+-- Module      :  DecisionTrees.Definitions
+-- Description :  Some definitions for DecisionTrees.
 -- License     :  MIT
 -- Stability   :  dev
+--
+-- Defines 'Entry' and 'Attribute'.
 
-module DecisionTrees.Learning (
+
+module DecisionTrees.Definitions (
 
   Attribute(..)
 , AttributeContainer(..)
@@ -12,7 +16,6 @@ module DecisionTrees.Learning (
 , AttrValSet
 
 , Entry(..)
-, TreeBranching(..)
 
 ) where
 
@@ -21,7 +24,7 @@ import Data.Set (Set)
 import Data.Typeable
 
 
-
+-----------------------------------------------------------------------------
 
 newtype AttributeName = AttrName String deriving (Eq, Ord)
 
@@ -30,7 +33,7 @@ type AttrValSet = (AttributeName, Set AttributeContainer)
 
 instance Show AttributeName where show (AttrName name) = name
 
-
+-----------------------------------------------------------------------------
 
 
 
@@ -38,6 +41,7 @@ class (Show attr) =>
     Attribute attr where
         possibleDiscreteDomains :: attr -> [PossibleDiscreteDomain attr]
         attributeName           :: attr -> AttributeName
+
 
 -- http://stackoverflow.com/questions/13015949/testing-equality-between-two-heterogeneous-values
 data AttributeContainer = forall attr . (Attribute attr, Typeable attr, Ord attr) => Attr attr
@@ -56,8 +60,7 @@ instance Ord AttributeContainer where
                                   in case c of EQ -> error "EQ"
                                                _  -> c
 
-attrName       (Attr attr) = attributeName attr
-
+-----------------------------------------------------------------------------
 
 
 
@@ -69,14 +72,6 @@ class (Show entry) =>
         classDomain    :: entry -> Set AttributeContainer
         attrByName     :: AttributeName -> entry -> AttributeContainer
 
-
-class TreeBranching entry where
-    -- | select best attributes splitting
-    selectBestAttrSplitting :: [entry]               -- ^ select from
-                            -> Set AttributeName     -- ^ except given attributes
-                            -> ([AttrValSet], Float) -- ^ best splitting
-    splitEntries            :: [entry] -> [AttrValSet] -> [(AttrValSet, [entry])]
-    finishedSplitting       :: [entry] -> Maybe [(AttributeContainer, Int)]
 
 
 

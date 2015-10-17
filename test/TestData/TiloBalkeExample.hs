@@ -26,7 +26,8 @@ module TestData.TiloBalkeExample (
 ) where
 
 import DecisionTrees
-import qualified DecisionTrees.Learning as L
+import DecisionTrees.Definitions hiding (Entry)
+import qualified DecisionTrees.Definitions as D
 
 import qualified Data.Map as Map
 import qualified Data.Set as Set
@@ -74,43 +75,43 @@ data Entry = Entry{ age         :: Age
                   }
               deriving (Show, Eq)
 
-instance L.Attribute Age where
+instance Attribute Age where
     possibleDiscreteDomains _ = [
        [ [AgeRange Nothing (Just 30)], [AgeRange (Just 31) (Just 40)],[ AgeRange (Just 41) Nothing] ] -- TODO not the best implementation
      ]
-    attributeName _ = L.AttrName "age"
+    attributeName _ = AttrName "age"
 
-instance L.Attribute Income where
+instance Attribute Income where
     possibleDiscreteDomains _ = [ [ [Income "high"], [Income "medium"], [Income "low"] ] ]
-    attributeName _ = L.AttrName "income"
+    attributeName _ = AttrName "income"
 
-instance L.Attribute Student where
+instance Attribute Student where
     possibleDiscreteDomains _ = [ [ [Student True], [Student False] ] ]
-    attributeName _ = L.AttrName "student"
+    attributeName _ = AttrName "student"
 
-instance L.Attribute CreditRating where
+instance Attribute CreditRating where
     possibleDiscreteDomains _ = [ [ [Fair], [Excellent] ] ]
-    attributeName _ = L.AttrName "credit rating"
+    attributeName _ = AttrName "credit rating"
 
-instance L.Attribute BuysComputer where
+instance Attribute BuysComputer where
     possibleDiscreteDomains _ = [ [ [Yes], [No] ] ]
-    attributeName _ = L.AttrName "buys computer"
+    attributeName _ = AttrName "buys computer"
 
-instance L.Entry Entry where
+instance D.Entry Entry where
     -- entry -> [AttributeContainer]
     listAttributes entry = map ($ entry) [
-       L.Attr . age
-     , L.Attr . income
-     , L.Attr . student
-     , L.Attr . credRating
+       Attr . age
+     , Attr . income
+     , Attr . student
+     , Attr . credRating
      ]
-    getClass = L.Attr . buysComp
-    classDomain _ = Set.fromList [L.Attr Yes, L.Attr No]
-    attrByName (L.AttrName name) =
-        case name of "age"           -> L.Attr . age
-                     "income"        -> L.Attr . income
-                     "student"       -> L.Attr . student
-                     "credit rating" -> L.Attr . credRating
+    getClass = Attr . buysComp
+    classDomain _ = Set.fromList [Attr Yes, Attr No]
+    attrByName (AttrName name) =
+        case name of "age"           -> Attr . age
+                     "income"        -> Attr . income
+                     "student"       -> Attr . student
+                     "credit rating" -> Attr . credRating
 
 newEntry age income student= Entry (Age age) (Income income) (Student student)
 
@@ -138,11 +139,11 @@ splitAge (Age age) | age <= 30 = AgeRange Nothing   (Just 30)
                    | otherwise = AgeRange (Just 31) (Just 40)
 
 
-tTrue  = L.Attr Yes
-tFalse = L.Attr No
+tTrue  = Attr Yes
+tFalse = Attr No
 
 
-expectedDecision :: Decision Entry L.AttributeContainer
+expectedDecision :: Decision Entry AttributeContainer
 expectedDecision =
     DecisionStep { prepare = splitAge . age
                  , describePrepare = "age"

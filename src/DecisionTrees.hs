@@ -1,5 +1,3 @@
---{-# LANGUAGE AllowAmbiguousTypes #-}
-
 -- |
 --
 -- Module      :  DecisionTrees
@@ -21,14 +19,14 @@ module DecisionTrees (
 
 
 import Data.Tree
-import Data.Typeable
 import Data.Map (Map)
 import Data.Set (Set)
 import qualified Data.Map as Map
 import qualified Data.Set as Set
 import Control.Arrow ( (&&&), second )
 
-import DecisionTrees.Learning
+import DecisionTrees.Definitions
+import DecisionTrees.TreeBranching
 
 
 data Decision entity clazz

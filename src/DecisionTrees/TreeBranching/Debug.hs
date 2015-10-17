@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------------
 --
--- Module      :  DecisionTrees.Learning.Debug
+-- Module      :  DecisionTrees.TreeBranching.Debug
 -- Copyright   :
 -- License     :  MIT
 --
@@ -12,11 +12,12 @@
 --
 -----------------------------------------------------------------------------
 
-module DecisionTrees.Learning.Debug (
+module DecisionTrees.TreeBranching.Debug (
   TreeBranchingDebug(..)
 ) where
 
-import DecisionTrees.Learning
+import DecisionTrees.TreeBranching
+import DecisionTrees.Definitions
 import Data.Set (Set)
 
 class (TreeBranching entry) =>
