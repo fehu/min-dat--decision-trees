@@ -34,7 +34,7 @@ data Decision entity clazz
   -- | A decision tree node.
   = forall cond . (Show cond, Ord cond) =>
     DecisionStep { prepare :: entity -> cond                     -- ^ extract a 'cond' for further selection
-                 , select  :: Map [cond] (Decision entity clazz) -- ^ the next nodes; the selection is based on
+                 , select  :: Map cond (Decision entity clazz)   -- ^ the next nodes; the selection is based on
                                                                  --   whether a 'cond' is contained in the key.
                  , describePrepare :: String                     -- ^ a description for 'prepare' transformation.
                  , describeSelect  :: Maybe String
@@ -89,14 +89,30 @@ buildDecisionTree' entries ignore selDescr =
                          return $ DecisionStep prepare (Map.fromList nxt) (show bestAttr) selDescr
           (best, v) = selectBestAttrSplitting entries ignore
           splitted  = splitEntries entries best
-          bestAttr  = fst . head $ best
+          next = do val <- Set.toList $ snd best
+                    let nextSel = Just $ show val
+                    return $ do tr <- buildDecisionTree' splitted (Set.insert bestAttr ignore) nextSel
+                                return (val, tr)
+
+          bestAttr  = fst best
           prepare   = attrByName bestAttr
-          next = do (attrVS, entries') <- splitted
-                    let attrCs = Set.toList . snd $ attrVS
-                    let nextSel = Just $ intercalate ", " . map show $ attrCs
-                    return $ do tr <- buildDecisionTree' entries' (Set.insert bestAttr ignore) nextSel
+
+
+
+--          splitted  = splitEntries entries best
+--          bestAttr  = fst best
+--          prepare   = attrByName bestAttr
+--          next = do tr <- buildDecisionTree' splitted (Set.insert bestAttr ignore) nextSel
+--                    return (attrCs, tr)
+--               where attrCs = Set.toList . snd $ best
+--                     nextSel = Just $ intercalate ", " . map show $ attrCs
+
+--                 do (attrVS, entries') <- splitted
+--                    let attrCs = Set.toList . snd $ attrVS
+--                    let nextSel = Just $ intercalate ", " . map show $ attrCs
+--                    return $ do tr <- buildDecisionTree' entries' (Set.insert bestAttr ignore) nextSel
 --                                putStrLn $ "next: attrVS = " ++ show attrVS
 --                                putStrLn $ "entries' = " ++ show entries'
-                                return (attrCs, tr)
+--                                return (attrCs, tr)
 
 

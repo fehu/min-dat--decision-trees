@@ -77,24 +77,24 @@ data Entry = Entry{ age         :: Age
 
 instance Attribute Age where
     possibleDiscreteDomains _ = [
-       [ [AgeRange Nothing (Just 30)], [AgeRange (Just 31) (Just 40)],[ AgeRange (Just 41) Nothing] ]
+       [ AgeRange Nothing (Just 30), AgeRange (Just 31) (Just 40), AgeRange (Just 41) Nothing ]
      ]
     attributeName _ = AttrName "age"
 
 instance Attribute Income where
-    possibleDiscreteDomains _ = [ [ [Income "high"], [Income "medium"], [Income "low"] ] ]
+    possibleDiscreteDomains _ = [ [ Income "high", Income "medium", Income "low" ] ]
     attributeName _ = AttrName "income"
 
 instance Attribute Student where
-    possibleDiscreteDomains _ = [ [ [Student True], [Student False] ] ]
+    possibleDiscreteDomains _ = [ [ Student True, Student False ] ]
     attributeName _ = AttrName "student"
 
 instance Attribute CreditRating where
-    possibleDiscreteDomains _ = [ [ [Fair], [Excellent] ] ]
+    possibleDiscreteDomains _ = [ [ Fair, Excellent ] ]
     attributeName _ = AttrName "credit rating"
 
 instance Attribute BuysComputer where
-    possibleDiscreteDomains _ = [ [ [Yes], [No] ] ]
+    possibleDiscreteDomains _ = [ [ Yes, No ] ]
     attributeName _ = AttrName "buys computer"
 
 instance D.Entry Entry where
@@ -147,9 +147,9 @@ expectedDecision :: Decision Entry AttributeContainer
 expectedDecision =
     DecisionStep { prepare = splitAge . age
                  , describePrepare = "age"
-                 , select = Map.fromList [ ([AgeRange Nothing   (Just 30)], treeAgeYoung)
-                                         , ([AgeRange (Just 31) (Just 40)], treeAgeMiddle)
-                                         , ([AgeRange (Just 41)  Nothing ], treeAgeSenior)
+                 , select = Map.fromList [ (AgeRange Nothing   (Just 30), treeAgeYoung)
+                                         , (AgeRange (Just 31) (Just 40), treeAgeMiddle)
+                                         , (AgeRange (Just 41)  Nothing , treeAgeSenior)
                                          ]
                  , describeSelect = Nothing
                  }
@@ -157,8 +157,8 @@ expectedDecision =
 
 treeAgeYoung  = DecisionStep { prepare = student
                              , describePrepare = "student?"
-                             , select = Map.fromList [ ([Student True],  treeYoungStudent)
-                                                     , ([Student False], treeYoungNotStudent)
+                             , select = Map.fromList [ (Student True,  treeYoungStudent)
+                                                     , (Student False, treeYoungNotStudent)
                                                      ]
                              , describeSelect = Just "young age"
                              }
@@ -173,8 +173,8 @@ treeAgeMiddle = Decision { classification = Map.fromList [(tTrue, 4)]
 
 treeAgeSenior = DecisionStep { prepare = credRating
                              , describePrepare = "credit rating"
-                             , select = Map.fromList [ ([Fair],      treeSeniorFair)
-                                                     , ([Excellent], treeSeniorExcellent)
+                             , select = Map.fromList [ (Fair,      treeSeniorFair)
+                                                     , (Excellent, treeSeniorExcellent)
                                                      ]
                              , describeSelect = Just "senior age"
                              }

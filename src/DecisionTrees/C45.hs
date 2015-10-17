@@ -74,20 +74,22 @@ gain' xs = information' (map sum $ transpose xs) - entropy' xs
 
 instance (Entry entry) =>
     TreeBranching entry where
-     -- selectBestAttrSplitting :: [entry] -> Set AttributeName -> ([AttrValSet], Float)
+     -- selectBestAttrSplitting :: [entry] -> Set AttributeName -> (AttrValSet, Float)
         selectBestAttrSplitting entries = fst . head . selectBestAttrSplitting' entries
 
-     -- splitEntries :: [entry] -> [AttrValSet] -> [(AttrValSet, [entry])]
-        splitEntries entries attrValSets =
-            do set@(attrName, attrValSet) <- attrValSets
-               let entries' = filter (\entry -> attrByName attrName entry `Set.member` attrValSet) entries
-               return (set, entries')
+     -- splitEntries :: [entry] -> AttrValSet -> [entry]
+        splitEntries entries attrValSet = entries'
+            where (attrName, attrSet) = attrValSet
+                  entries' = filter (\entry -> attrByName attrName entry `Set.member` attrSet) entries
+
 
      -- finishedSplitting :: [entry] -> Maybe [(AttributeContainer, Int)]
         finishedSplitting entries | null classes        = Just []
                                   | length classes == 1 = Just classes
                                   | otherwise           = Nothing
             where classes = sortingGroupBy getClass length entries
+
+
 --      TODO
 --            where classCount = sortingGroupBy getClass length entries
 --                  (classMax, classMaxCoint) = maximumBy (compare `on` snd) classCount
@@ -96,23 +98,17 @@ instance (Entry entry) =>
     TreeBranchingDebug entry where
         selectBestAttrSplitting' entries except = sortSplit
             where splitByGain = do (Attr attr) <- listAttributes (head entries)
+                                   let attrName = attributeName attr
+
                                    attrSplit   <- possibleDiscreteDomains attr
+                                   let attrVS  = (attrName, Set.fromList $ map Attr attrSplit)
+                                   let entries' = splitEntries entries attrVS
+                                   let cc       = countClasses entries'
 
-                                   let attrSplitVS = map (\as -> ( attributeName attr
-                                                                 , Set.fromList $ map Attr as)
-                                                         ) attrSplit
-                                   let cc = do (attr', entries') <- splitEntries entries attrSplitVS
-                                               return $ countClasses entries'
---                                               if fst attr' `Set.notMember` except
---                                                then return $ countClasses attr' entries'
---                                                else []
-                                   let c = map (map snd) cc
-
-                                   if (fst . head $ attrSplitVS) `Set.notMember` except
-                                    then return ((attrSplitVS, gain' c), cc)
+                                   if attrName `Set.notMember` except
+                                    then return ((attrVS, gain' [map snd cc]), cc) -- TODO is it ok?
                                     else []
---                  gain xs   = information' (map sum xs) - entropy' xs
---                  sortSplit = sortBy (compare `on` snd) splitByGain
+                  gain xs   = information' (map sum xs) - entropy' xs
                   sortSplit = sortBy (compare `on` (negate . snd . fst)) splitByGain
 
 --countClasses :: (Entry entry) => [entry] -> Map AttributeContainer Int

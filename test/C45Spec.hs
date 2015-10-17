@@ -91,7 +91,7 @@ compareDecision level ideal res =
     where ind = ind' "| "
           ind' p = replicate (4*level) ' ' ++ p
 
-ordSelect :: (Ord a) => Map [a] b -> [b]
+ordSelect :: (Ord a) => Map a b -> [b]
 ordSelect = map snd . sortBy (compare `on` fst) . Map.toList
 
 sameDecisionConstructor (DecisionStep {}) (DecisionStep {}) = True

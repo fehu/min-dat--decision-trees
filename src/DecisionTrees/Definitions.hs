@@ -28,7 +28,7 @@ import Data.Typeable
 
 newtype AttributeName = AttrName String deriving (Eq, Ord)
 
-type PossibleDiscreteDomain attr = [[attr]]
+type PossibleDiscreteDomain attr = [attr]
 type AttrValSet = (AttributeName, Set AttributeContainer)
 
 instance Show AttributeName where show (AttrName name) = name

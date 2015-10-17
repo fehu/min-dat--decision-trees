@@ -24,4 +24,4 @@ class (TreeBranching entry) =>
     TreeBranchingDebug entry where
         selectBestAttrSplitting' ::  [entry]      -- ^ select from
                             -> Set AttributeName  -- ^ except given attributes
-                            -> [(([AttrValSet], Float), [[(AttributeContainer, Int)]])] -- ^ sorted splitting
+                            -> [((AttrValSet, Float), [(AttributeContainer, Int)])] -- ^ sorted splitting
