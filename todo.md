@@ -5,5 +5,6 @@ TODO
 - [ ] Refactor:
   - [x] Learning.hs - senseless name.
 - [ ] Use Weka *.arff data.
-- [ ] Visualize trees
+- [x] Visualize trees.
+    - [ ] Use GUI.
 - [ ] Add documentation.

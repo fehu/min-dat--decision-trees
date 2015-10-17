@@ -34,7 +34,7 @@ import qualified Data.Set as Set
 import Control.Applicative
 import Data.Typeable
 
---newtype Age = Age Int                deriving (Show, Eq, Ord)
+
 data Age = Age Int | AgeRange (Maybe Int) (Maybe Int) deriving Typeable
 newtype Income = Income String       deriving (Show, Eq, Ord, Typeable)
 newtype Student = Student Bool       deriving (Show, Eq, Ord, Typeable)
@@ -43,8 +43,8 @@ data BuysComputer = Yes  | No        deriving (Show, Eq, Ord, Typeable)
 
 
 instance Show Age where
-    show (Age n) = "Age " ++ show n
-    show (AgeRange mbFrom mbTo) = "Age [" ++ strFrom ++ ".." ++ strTo ++ "]"
+    show (Age n) = show n ++ "years"
+    show (AgeRange mbFrom mbTo) = "[" ++ strFrom ++ ".." ++ strTo ++ "]"
         where strFrom = maybe "" show mbFrom
               strTo   = maybe "" show mbTo
 
@@ -77,7 +77,7 @@ data Entry = Entry{ age         :: Age
 
 instance Attribute Age where
     possibleDiscreteDomains _ = [
-       [ [AgeRange Nothing (Just 30)], [AgeRange (Just 31) (Just 40)],[ AgeRange (Just 41) Nothing] ] -- TODO not the best implementation
+       [ [AgeRange Nothing (Just 30)], [AgeRange (Just 31) (Just 40)],[ AgeRange (Just 41) Nothing] ]
      ]
     attributeName _ = AttrName "age"
 
@@ -113,7 +113,7 @@ instance D.Entry Entry where
                      "student"       -> Attr . student
                      "credit rating" -> Attr . credRating
 
-newEntry age income student= Entry (Age age) (Income income) (Student student)
+newEntry age income student = Entry (Age age) (Income income) (Student student)
 
 
 testData :: [Entry]

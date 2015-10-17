@@ -21,6 +21,7 @@ module DecisionTrees (
 import Data.Tree
 import Data.Map (Map)
 import Data.Set (Set)
+import Data.List(intercalate)
 import qualified Data.Map as Map
 import qualified Data.Set as Set
 import Control.Arrow ( (&&&), second )
@@ -46,8 +47,13 @@ data Decision entity clazz
 
 instance (Show decision) =>
     Show (Decision entity decision)
-        where show (DecisionStep _ sel dp ds) = maybe "" (++": ") ds ++ dp ++ " ==>"
-              show (Decision d ds)            = maybe "" (++": ") ds ++ show d
+        where show (DecisionStep _ sel dp ds) = maybe "" (++" ==> ") ds ++ dp
+              show (Decision d ds)            = maybe "" (++" ==> ") ds
+                                                 ++ ( intercalate ", "
+                                                    . map (\(c,i) -> show c ++ ": " ++ show i)
+                                                    . Map.toAscList
+                                                    $ d
+                                                    )
 
 type DecisionTree entity decision = Tree (Decision entity decision)
 
@@ -87,7 +93,7 @@ buildDecisionTree' entries ignore selDescr =
           prepare   = attrByName bestAttr
           next = do (attrVS, entries') <- splitted
                     let attrCs = Set.toList . snd $ attrVS
-                    let nextSel = Just $ show attrCs
+                    let nextSel = Just $ intercalate ", " . map show $ attrCs
                     return $ do tr <- buildDecisionTree' entries' (Set.insert bestAttr ignore) nextSel
 --                                putStrLn $ "next: attrVS = " ++ show attrVS
 --                                putStrLn $ "entries' = " ++ show entries'
