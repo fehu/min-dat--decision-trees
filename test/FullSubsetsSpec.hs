@@ -8,6 +8,10 @@ import qualified Data.Set as Set
 spec :: Spec
 spec = describe "DecisionTrees.Utils.fullSubsets" $
         it "should return a set of possible set splittings" $ do
+            example $ fullSubsets (Set.fromList [1..2]) `shouldBe` Set.fromList
+                [ Set.singleton $ Set.fromList [1..2]
+                , Set.fromList $ map Set.singleton [1..2]
+                ]
             example $ fullSubsets (Set.fromList [1..3]) `shouldBe` Set.fromList
                 [ Set.singleton $ Set.fromList [1..3]
                 , Set.fromList [ Set.singleton 1, Set.fromList [2, 3] ]

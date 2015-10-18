@@ -5,7 +5,6 @@ module Main (
 import Test.Hspec
 
 import TestData.TiloBalkeExample
-import DecisionTreesSpec
 import qualified AgeSpec
 import qualified C45Spec
 import qualified FullSubsetsSpec

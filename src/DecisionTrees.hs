@@ -89,7 +89,8 @@ buildDecisionTree' entries ignore selDescr =
                          return $ DecisionStep prepare (Map.fromList nxt) (show bestAttr) selDescr
           (best, v) = selectBestAttrSplitting entries ignore
           splitted  = splitEntries entries best
-          bestAttr  = fst . head $ best
+          bestAttr  = case best of []        -> error $ "empty best: " ++ show best
+                                   (ba, _):_ -> ba
           prepare   = attrByName bestAttr
           next = do (attrVS, entries') <- splitted
                     let attrCs = Set.toList . snd $ attrVS
