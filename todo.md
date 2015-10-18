@@ -3,7 +3,8 @@ TODO
 
 Critical
 
-- [ ] possibleDiscreteDomains for numerics
+- [ ] possibleDiscreteDomains for numerics.
+- [ ] classify an entry using a tree.
 
 General
 
