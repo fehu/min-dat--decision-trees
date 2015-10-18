@@ -1,6 +1,12 @@
 TODO
 ====
 
+Critical
+
+- [ ] possibleDiscreteDomains for numerics
+
+General
+
 - [x] Test C4.5 with a precalculated example.
 - [ ] Refactor:
   - [x] Learning.hs - senseless name.
@@ -8,3 +14,4 @@ TODO
 - [x] Visualize trees.
     - [ ] Use GUI.
 - [ ] Add documentation.
+
