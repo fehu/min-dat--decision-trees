@@ -25,10 +25,11 @@ import Data.Typeable
 
 
 -----------------------------------------------------------------------------
-
+-- | An isomorphic container for attribute name.
 newtype AttributeName = AttrName String deriving (Eq, Ord)
 
 type PossibleDiscreteDomain attr = [[attr]]
+-- | A set of values of an attribute.
 type AttrValSet = (AttributeName, Set AttributeContainer)
 
 instance Show AttributeName where show (AttrName name) = name
@@ -36,13 +37,15 @@ instance Show AttributeName where show (AttrName name) = name
 -----------------------------------------------------------------------------
 
 
-
+-- | A typeclass, describing attribute.
 class (Show attr) =>
     Attribute attr where
+        -- | all possible discrete domains of an attribute
         possibleDiscreteDomains :: attr -> [PossibleDiscreteDomain attr]
+        -- | the name of an attribute.
         attributeName           :: attr -> AttributeName
 
-
+-- | Heterogeneous container for an attribute. See
 -- http://stackoverflow.com/questions/13015949/testing-equality-between-two-heterogeneous-values
 data AttributeContainer = forall attr . (Attribute attr, Typeable attr, Ord attr) => Attr attr
 
@@ -63,7 +66,8 @@ instance Ord AttributeContainer where
 -----------------------------------------------------------------------------
 
 
-
+-- | A typeclass, describing data entries, 
+--   that consist of attributes and class.
 class (Show entry) =>
     Entry entry where
         -- | List the attributes, except class
