@@ -1,7 +1,7 @@
 module Main (main) where
 
 import DecisionTrees
-import RunC45Weka
+import RunID3Weka
 
 import System.Environment
 import System.Exit
@@ -39,7 +39,7 @@ parse _ = unknownCmd >> usage >> exitFailure
 
 unknownCmd = putStrLn "unknown command"
 
-usage = do putStrLn "Usage: C45Weka [-h] file [--iter tp]"
+usage = do putStrLn "Usage: ID3Weka [-h] file [--iter tp]"
            putStrLn "       where file is an *.arff nominal data file" -- TODO: numerics!
            putStrLn "             --iter tp - run in iterative mode with tp percent forming test set"
 

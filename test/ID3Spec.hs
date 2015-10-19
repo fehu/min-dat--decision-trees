@@ -1,11 +1,11 @@
 -----------------------------------------------------------------------------
 --
--- Module      :  C45Spec
+-- Module      :  ID3Spec
 -- License     :  MIT
 --
 -----------------------------------------------------------------------------
 
-module C45Spec ( spec ) where
+module ID3Spec ( spec ) where
 
 import Test.Hspec
 import Test.QuickCheck
@@ -19,7 +19,7 @@ import qualified Data.Map as Map
 import Control.Arrow
 
 import DecisionTrees
-import DecisionTrees.C45
+import DecisionTrees.ID3
 import DecisionTrees.Definitions hiding (Entry)
 import TestData.TiloBalkeExample
 
@@ -32,7 +32,7 @@ spec = do runIO . hspec $ specFuncs
 
 
 specFuncs :: Spec
-specFuncs = describe "DecisionTrees.C45" $ do
+specFuncs = describe "DecisionTrees.ID3" $ do
 
         describe "information" $ do
             specify "I(3, 2) = 0.971" $ example $ round' 3 (information 3 2) `shouldBe` 0.971
@@ -65,7 +65,7 @@ specFuncs = describe "DecisionTrees.C45" $ do
 
 specExample :: Spec
 specExample = let x = do res <- buildDecisionTree testData
-                         let h = describe "DecisionTrees.C45" $
+                         let h = describe "DecisionTrees.ID3" $
                                     context "given a precalculated example" $
                                         describe "must behave as the example given" $
                                             compareDecision 0 expectedDecision res

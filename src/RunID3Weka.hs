@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------------
 --
--- Module      :  RunC45Weka
+-- Module      :  RunID3Weka
 -- Copyright   :
 -- License     :  MIT
 --
@@ -12,7 +12,7 @@
 --
 -----------------------------------------------------------------------------
 
-module RunC45Weka (
+module RunID3Weka (
   WekaVal(..)
 , WekaAttributeRepr(..)
 , GenericEntry(..)
@@ -26,7 +26,7 @@ module RunC45Weka (
 import DecisionTrees
 import DecisionTrees.Definitions
 import DecisionTrees.TreeBranching
-import DecisionTrees.C45
+import DecisionTrees.ID3
 import DecisionTrees.Utils
 import WekaData
 import WekaData.Show.Name

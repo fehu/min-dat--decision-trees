@@ -3,7 +3,7 @@ module Main (
 ) where
 
 import DecisionTrees
-import DecisionTrees.C45
+import DecisionTrees.ID3
 import TestData.TiloBalkeExample
 
 import Data.Tree

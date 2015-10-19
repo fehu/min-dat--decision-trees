@@ -9,7 +9,7 @@ name:                DecisionTrees
 -- PVP summary:      +-+------- breaking API changes
 --                   | | +----- non-breaking API additions
 --                   | | | +--- code changes with no API change
-version:             0.1.2.0
+version:             0.2.0.0
 
 synopsis:            Decision Trees
 
@@ -31,7 +31,7 @@ library
                         DecisionTrees.Definitions
                         DecisionTrees.TreeBranching
                         DecisionTrees.TreeBranching.Debug
-                        DecisionTrees.C45
+                        DecisionTrees.ID3
                         DecisionTrees.Utils
   -- other-modules:
   hs-source-dirs:       src
@@ -54,7 +54,7 @@ executable Example
 
 
 
-executable C45Weka
+executable ID3Weka
     build-depends: DecisionTrees
                  , WekaData >= 0.1.2
                  , base >=4.7 && <4.8
@@ -62,8 +62,8 @@ executable C45Weka
                  , random-fu >= 0.2.6 && <= 0.2.7
                  , random-extras == 0.19
     hs-source-dirs: src
-    main-is: RunC45Weka/Main.hs
-    other-modules: RunC45Weka
+    main-is: RunID3Weka/Main.hs
+    other-modules: RunID3Weka
     buildable: True
     default-language: Haskell2010
     default-extensions:   ExistentialQuantification
@@ -85,5 +85,5 @@ test-suite tests
     other-modules: TestData
                    TestData.TiloBalkeExample
                    AgeSpec
-                   C45Spec
+                   ID3Spec
                    FullSubsetsSpec

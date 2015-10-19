@@ -2,11 +2,11 @@
 
 -- |
 --
--- Module      :  DecisionTrees.C45
+-- Module      :  DecisionTrees.ID3
 -- License     :  MIT
 -- Stability   :  dev
 
-module DecisionTrees.C45 (
+module DecisionTrees.ID3 (
 
   information
 , information'
