@@ -18,6 +18,7 @@ module RunC45Weka (
 , GenericEntry(..)
 
 , run
+, runIterative
 , drawDecisionTree
 
 ) where
@@ -34,9 +35,15 @@ import WekaData.Show.Name
 import Control.Arrow
 import Data.Typeable
 import Data.Map.Strict (Map)
+import Data.List ((\\))
 import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
 import qualified Data.Tree as Tree
+import GHC.Float
+
+import Data.Random
+import Data.Random.Sample
+import qualified Data.Random.Extras as RE
 
 -----------------------------------------------------------------------------
 
@@ -52,7 +59,7 @@ instance Show WekaVal where
 
 data GenericEntry = GenericEntry (Map WekaDataAttribute WekaVal)
                                  (WekaDataAttribute, WekaVal)
-                deriving Show
+                deriving (Show, Eq)
 
 
 newtype WekaAttributeRepr = WekaAttributeRepr (WekaDataAttribute, WekaVal)
@@ -98,8 +105,7 @@ instance Entry GenericEntry where
 type Filename = String
 
 run :: Filename -> IO (Decision GenericEntry AttributeContainer)
-run filename = do RawWekaData name attrs dta <- readWekaData filename
-                  let entries = map (mkEntry attrs) dta
+run filename = do entries <- getEntries filename
                   buildDecisionTree entries
 
 
@@ -108,6 +114,24 @@ mkEntry attrs vals = GenericEntry vmap clazz
     where vmap  = Map.fromList $ zip (init attrs) (map WekaNomVal $ init vals)
           clazz = (last attrs, WekaNomVal $ last vals)
 
+getEntries filename = do
+    RawWekaData name attrs dta <- readWekaData filename
+    return $ map (mkEntry attrs) dta
+
+
+-----------------------------------------------------------------------------
+
+runIterative :: Filename    -- ^ file name
+             -> Float       -- ^ the percent of /test/ entries
+             -> IO (Decision GenericEntry AttributeContainer) -- ^ the decision tree
+
+
+runIterative filename testPercent = do
+    entries <- getEntries filename
+    let testEntriesCount = float2Int $ int2Float (length entries) * testPercent
+    testEntries <- runRVar (RE.sample testEntriesCount entries) StdRandom
+    let learnEntries = entries \\ testEntries
+    buildDecisionTreeIterative learnEntries testEntries
 
 -----------------------------------------------------------------------------
 

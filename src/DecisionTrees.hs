@@ -14,6 +14,9 @@ module DecisionTrees (
 , decision2Tree
 
 , buildDecisionTree
+, buildDecisionTreeIterative
+
+, classifyWithDecisionTree
 
 ) where
 
@@ -21,7 +24,7 @@ module DecisionTrees (
 import Data.Tree
 import Data.Map (Map)
 import Data.Set (Set)
-import Data.List(intercalate)
+import Data.List(intercalate, (\\))
 import qualified Data.Map as Map
 import qualified Data.Set as Set
 import Control.Arrow ( (&&&), second )
@@ -66,8 +69,44 @@ listChildren (Decision _ _)           = []
 decision2Tree f = unfoldTree (f &&& listChildren)
 
 
+-- | classify an entry using a "Decision".
+classifyWithDecisionTree :: Entry entry =>
+     Decision entry AttributeContainer -- ^ a decision tree
+     -> entry                          -- ^ an entry to classify
+     -> AttributeContainer             -- ^ classification result
+
+classifyWithDecisionTree (DecisionStep prep sel dp _) entry =
+    case next of [(_, nxt)] -> classifyWithDecisionTree nxt entry
+                 _          -> error $ "not found " ++ dp ++ " in " ++ show entry
+    where esel = prep entry
+          next = Map.toList $ Map.filterWithKey (\k _ -> esel `elem` k) sel
+
+classifyWithDecisionTree (Decision clazzMap _) _ = fst $ Map.findMax clazzMap
+
+
 -----------------------------------------------------------------------------
--- | build a decision tree, using the imported instance of 'TreeBranching'
+-- | build a decision tree, based on the /learning/ entries,
+--   using the imported instance of 'TreeBranching'.
+--   The /test/ entries are used to assess tree's quality;
+--   failed examples are added to the /learning/ set and the process is rerun.
+buildDecisionTreeIterative :: (Eq entry, Entry entry, TreeBranching entry) =>
+        [entry]     -- ^ learning entries
+     -> [entry]     -- ^ test entries
+     -> IO (Decision entry AttributeContainer)  -- ^ the decision tree
+
+buildDecisionTreeIterative learnEntries testEntries = do
+    dtree <- buildDecisionTree learnEntries
+    let failTst = filter (\e -> classifyWithDecisionTree dtree e /= getClass e) testEntries
+    if null failTst
+        then return dtree
+        else do let newLearn = learnEntries ++ failTst
+                let newTest  = testEntries \\ failTst
+                buildDecisionTreeIterative newLearn newTest
+
+
+-----------------------------------------------------------------------------
+-- | build a decision tree, based on the given entries,
+-- | using the imported instance of 'TreeBranching'.
 buildDecisionTree :: (Entry entry, TreeBranching entry) =>
     [entry] -> IO (Decision entry AttributeContainer)
 

@@ -9,7 +9,7 @@ name:                DecisionTrees
 -- PVP summary:      +-+------- breaking API changes
 --                   | | +----- non-breaking API additions
 --                   | | | +--- code changes with no API change
-version:             0.1.1.0
+version:             0.1.2.0
 
 synopsis:            Decision Trees
 
@@ -57,8 +57,10 @@ executable Example
 executable C45Weka
     build-depends: DecisionTrees
                  , WekaData >= 0.1.2
-                 , base -any
-                 , containers -any
+                 , base >=4.7 && <4.8
+                 , containers > 0.5
+                 , random-fu >= 0.2.6 && <= 0.2.7
+                 , random-extras == 0.19
     hs-source-dirs: src
     main-is: RunC45Weka/Main.hs
     other-modules: RunC45Weka
