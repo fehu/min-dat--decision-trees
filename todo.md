@@ -16,3 +16,7 @@ General
     - [ ] Use GUI.
 - [ ] Add documentation.
 
+Improvements
+
+- [ ] Use iterative learning. See **General Criteria on Building Decision Trees for Data Classification (2.1)**: Empirical evidence suggests that a correct decision tree is usually found more quickly by this iterative.
+method than by forming a tree directly from entire training sets.
