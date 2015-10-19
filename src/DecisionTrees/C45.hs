@@ -41,8 +41,6 @@ entropy = entropy' . map (\x -> map ($ x) [fst, snd])
 
 information' :: [Int] -> Float
 information' ns = sum $ map f ns
--- | 0 `elem` ns = 0
---                | otherwise   = sum $ map f ns
     where f 0    = 0
           f x    = - uncurry (*) ((id &&& logBase 2 ) (frac x))
           frac x = int2Float x / nSum

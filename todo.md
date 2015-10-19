@@ -8,6 +8,7 @@ Critical
 
 General
 
+- [ ] Rename C45 => ID3 (it lacks some features of C4.5);
 - [x] Test C4.5 with a precalculated example.
 - [ ] Refactor:
   - [x] Learning.hs - senseless name.
