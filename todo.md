@@ -12,7 +12,7 @@ General
 - [x] Test C4.5 with a precalculated example.
 - [ ] Refactor:
   - [x] Learning.hs - senseless name.
-- [ ] Use Weka *.arff data.
+- [x] Use Weka *.arff data.
 - [x] Visualize trees.
     - [ ] Use GUI.
 - [x] Add documentation.
