@@ -21,6 +21,7 @@ license-file:        LICENSE
 author:              Dmitry K
 build-type:          Simple
 extra-source-files:  README.md
+                     todo.md
 cabal-version:       >=1.10
 
 
