@@ -60,7 +60,7 @@ instance (Show decision) =>
 
 type DecisionTree entity decision = Tree (Decision entity decision)
 
--- | List children nodes.
+-- | list children nodes.
 listChildren :: Decision e d -> [Decision e d]
 listChildren (DecisionStep _ sel _ _) = Map.elems sel
 listChildren (Decision _ _)           = []
@@ -106,16 +106,16 @@ buildDecisionTreeIterative learnEntries testEntries = do
 
 -----------------------------------------------------------------------------
 -- | build a decision tree, based on the given entries,
--- | using the imported instance of 'TreeBranching'.
+--   using the imported instance of 'TreeBranching'.
 buildDecisionTree :: (Entry entry, TreeBranching entry) =>
     [entry] -> IO (Decision entry AttributeContainer)
 
 buildDecisionTree entries = buildDecisionTree' entries Set.empty Nothing
 
+
+
 buildDecisionTree' :: (Entry entry, TreeBranching entry) =>
     [entry] -> Set AttributeName -> Maybe String -> IO (Decision entry AttributeContainer)
-
---buildDecisionTree' entries 10 = return $ Decision Map.empty
 
 buildDecisionTree' entries ignore selDescr =
     case finishedSplitting entries of Just clazz -> return $ Decision (Map.fromList clazz) selDescr

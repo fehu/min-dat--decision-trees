@@ -66,14 +66,17 @@ instance Ord AttributeContainer where
 -----------------------------------------------------------------------------
 
 
--- | A typeclass, describing data entries, 
---   that consist of attributes and class.
+-- | A typeclass, describing data entries,
+--   that consist of attributes (including class).
 class (Show entry) =>
     Entry entry where
-        -- | List the attributes, except class
+        -- | list the attributes, except class
         listAttributes :: entry -> [AttributeContainer]
+        -- | get entrie's class attribute
         getClass       :: entry -> AttributeContainer
+        -- | get the domain of class attribute.
         classDomain    :: entry -> Set AttributeContainer
+        -- | get attribute value of entry by attribute name.
         attrByName     :: AttributeName -> entry -> AttributeContainer
 
 

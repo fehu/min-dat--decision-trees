@@ -15,7 +15,7 @@ General
 - [ ] Use Weka *.arff data.
 - [x] Visualize trees.
     - [ ] Use GUI.
-- [ ] Add documentation.
+- [x] Add documentation.
 
 Improvements
 

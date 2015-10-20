@@ -26,7 +26,7 @@ cabal-version:       >=1.10
 
 library
   build-depends:        base >=4.7 && <4.8
-                      , containers > 0.5
+                      , containers == 0.5.5.1
   exposed-modules:      DecisionTrees
                         DecisionTrees.Definitions
                         DecisionTrees.TreeBranching
@@ -46,7 +46,7 @@ library
 executable Example
     build-depends: DecisionTrees
                  , base -any
-                 , containers -any
+                 , containers == 0.5.5.1
     hs-source-dirs: test
     main-is: RunExample.hs
     buildable: True
@@ -58,7 +58,7 @@ executable ID3Weka
     build-depends: DecisionTrees
                  , WekaData >= 0.1.2
                  , base >=4.7 && <4.8
-                 , containers > 0.5
+                 , containers == 0.5.5.1
                  , random-fu >= 0.2.6 && <= 0.2.7
                  , random-extras == 0.19
     hs-source-dirs: src

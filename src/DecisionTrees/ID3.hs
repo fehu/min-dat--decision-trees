@@ -4,7 +4,10 @@
 --
 -- Module      :  DecisionTrees.ID3
 -- License     :  MIT
+-- Description :  ID3 algorithm implementation.
 -- Stability   :  dev
+--
+-- ID3 algorithm implementation.
 
 module DecisionTrees.ID3 (
 
@@ -30,7 +33,6 @@ import DecisionTrees.TreeBranching
 import DecisionTrees.TreeBranching.Debug
 import DecisionTrees.Utils
 
-
 information :: Int -> Int -> Float
 information x y = information' [x, y]
 
@@ -52,12 +54,15 @@ entropy' ns = sum . map f $ ns
           nSum = int2Float . sum . map sum $ ns
 
 
+-- | information gain.
 gain :: [(Int, Int)] -> Float
 gain = gain' . map (\x -> map ($ x) [fst, snd])
 
+-- | information gain.
 gain' :: [[Int]] -> Float
 gain' xs = information' (map sum $ transpose xs) - entropy' xs
 
+-- | ID3 algorithm implementation.
 instance (Entry entry) =>
     TreeBranching entry where
      -- selectBestAttrSplitting :: [entry] -> Set AttributeName -> ([AttrValSet], Float)
@@ -81,6 +86,8 @@ instance (Entry entry) =>
 --            where classCount = sortingGroupBy getClass length entries
 --                  (classMax, classMaxCoint) = maximumBy (compare `on` snd) classCount
 
+
+-- | ID3 debug.
 instance (Entry entry) =>
     TreeBranchingDebug entry where
         selectBestAttrSplitting' [] _ = error "empty entries"
