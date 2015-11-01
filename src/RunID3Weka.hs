@@ -28,7 +28,7 @@ import DecisionTrees.Definitions
 import DecisionTrees.TreeBranching
 import DecisionTrees.ID3
 import DecisionTrees.Utils
-import WekaData
+import WekaData hiding (WekaVal, WekaEntry)
 import WekaData.Show.Name
 
 
