@@ -35,6 +35,7 @@ import Control.Arrow
 import Data.Typeable
 import Data.Map.Strict (Map)
 import Data.List ((\\))
+import Data.Maybe (isJust)
 import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
 import qualified Data.Tree as Tree
@@ -85,6 +86,7 @@ instance Entry WekaEntry where
         where err = error $ "Attribute '" ++ name
                  ++ "' not found in " ++ show e
 
+    hasAttribute (AttrName name) (WEntry set) = isJust $ lookupWValInSet name set
 
 
 -----------------------------------------------------------------------------

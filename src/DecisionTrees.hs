@@ -111,7 +111,9 @@ buildDecisionTreeIterative learnEntries testEntries = do
 buildDecisionTree :: (Entry entry, TreeBranching entry) => (?clazz :: ClassDescriptor) =>
     [entry] -> IO (Decision entry AttributeContainer)
 
-buildDecisionTree entries = buildDecisionTree' entries Set.empty Nothing
+buildDecisionTree entries = buildDecisionTree' entries' Set.empty Nothing
+    where Class c = ?clazz
+          entries' = filter (hasAttribute $ AttrName c) entries
 
 
 

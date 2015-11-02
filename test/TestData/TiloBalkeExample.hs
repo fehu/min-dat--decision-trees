@@ -113,6 +113,7 @@ instance D.Entry Entry where
                      "income"        -> Attr . income
                      "student"       -> Attr . student
                      "credit rating" -> Attr . credRating
+    hasAttribute _ _ = True
 
 newEntry age income student = Entry (Age age) (Income income) (Student student)
 

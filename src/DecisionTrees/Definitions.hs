@@ -80,6 +80,8 @@ class (Show entry) =>
         classDomain    :: (?clazz :: ClassDescriptor) => entry -> Set AttributeContainer
         -- | get attribute value of entry by attribute name.
         attrByName     :: AttributeName -> entry -> AttributeContainer
+        -- | entry has attribute?
+        hasAttribute   :: AttributeName -> entry -> Bool
 
 
 
