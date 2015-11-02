@@ -25,12 +25,14 @@ import Data.Tree
 import Data.Map (Map)
 import Data.Set (Set)
 import Data.List(intercalate, (\\))
+import Data.Maybe (fromMaybe)
 import qualified Data.Map as Map
 import qualified Data.Set as Set
 import Control.Arrow ( (&&&), second )
 
 import DecisionTrees.Definitions
 import DecisionTrees.TreeBranching
+import DecisionTrees.Utils
 
 
 data Decision entity clazz
@@ -46,6 +48,7 @@ data Decision entity clazz
   | Decision { classification :: Map clazz Int  -- ^ classes and corresponding entities count.
              , describeSelect :: Maybe String
              }
+  | Undefined{ describeSelect :: Maybe String }
 
 
 instance (Show decision) =>
@@ -57,6 +60,7 @@ instance (Show decision) =>
                                                     . Map.toAscList
                                                     $ d
                                                     )
+              show (Undefined ds)             = "? " ++ fromMaybe "" ds ++ " ?"
 
 type DecisionTree entity decision = Tree (Decision entity decision)
 
@@ -120,10 +124,16 @@ buildDecisionTree entries = buildDecisionTree' entries' Set.empty Nothing
 buildDecisionTree' :: (Entry entry, TreeBranching entry) => (?clazz :: ClassDescriptor) =>
     [entry] -> Set AttributeName -> Maybe String -> IO (Decision entry AttributeContainer)
 
-buildDecisionTree' entries ignore selDescr =
+buildDecisionTree' [] _ ds = return $ Undefined ds
+buildDecisionTree' entries ignore selDescr
+    | null best = return $ Decision classes selDescr
+--    | totalAttributes (head entries) == Set.size ignore + 1 = return $ Decision classes selDescr
+--    | Set.fromList . map $ entries == ignore = undefined
+    | otherwise =
     case finishedSplitting entries of Just clazz -> return $ Decision (Map.fromList clazz) selDescr
                                       _          -> buildStep
-    where buildStep = do nxt <- sequence next
+    where classes   = Map.fromList $ sortingGroupBy getClass length entries
+          buildStep = do nxt <- sequence next
 --                         putStrLn "buildStep"
 --                         putStrLn $ "best = " ++ show best
 --                         putStrLn $ "v = " ++ show v ++ "\n"

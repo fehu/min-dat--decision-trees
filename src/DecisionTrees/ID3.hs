@@ -68,13 +68,15 @@ instance (Entry entry) =>
      -- selectBestAttrSplitting :: [entry] -> Set AttributeName -> ([AttrValSet], Float)
         selectBestAttrSplitting entries except =
             case selectBestAttrSplitting' entries except of
-                []        -> error "empty selectBestAttrSplitting'"
+                []        -> ([], 0) -- error "empty selectBestAttrSplitting'"
                 (bs, _):_ -> bs
 
      -- splitEntries :: [entry] -> [AttrValSet] -> [(AttrValSet, [entry])]
         splitEntries entries attrValSets =
             do set@(attrName, attrValSet) <- attrValSets
-               let entries' = filter (\entry -> attrByName attrName entry `Set.member` attrValSet) entries
+               let entries' = filter (\entry -> not (hasAttribute attrName entry)
+                                             || attrByName attrName entry `Set.member` attrValSet)
+                                     entries
                return (set, entries')
 
      -- finishedSplitting :: [entry] -> Maybe [(AttributeContainer, Int)]

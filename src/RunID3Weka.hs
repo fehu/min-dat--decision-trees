@@ -70,7 +70,6 @@ instance Entry WekaEntry where
 
  -- listAttributes :: entry -> [AttributeContainer]
     listAttributes  = map Attr . snd . separateClass
---    map mkAttr $ Map.toAscList dta
 
  -- getClass :: entry -> AttributeContainer
     getClass = Attr . fst . separateClass
