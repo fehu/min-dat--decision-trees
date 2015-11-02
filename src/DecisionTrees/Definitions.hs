@@ -15,6 +15,7 @@ module DecisionTrees.Definitions (
 , AttributeName(..)
 , AttrValSet
 
+, ClassDescriptor(..)
 , Entry(..)
 
 ) where
@@ -65,17 +66,18 @@ instance Ord AttributeContainer where
 
 -----------------------------------------------------------------------------
 
+data ClassDescriptor = Class String
 
 -- | A typeclass, describing data entries,
 --   that consist of attributes (including class).
 class (Show entry) =>
     Entry entry where
         -- | list the attributes, except class
-        listAttributes :: entry -> [AttributeContainer]
+        listAttributes :: (?clazz :: ClassDescriptor) => entry -> [AttributeContainer]
         -- | get entrie's class attribute
-        getClass       :: entry -> AttributeContainer
+        getClass       :: (?clazz :: ClassDescriptor) => entry -> AttributeContainer
         -- | get the domain of class attribute.
-        classDomain    :: entry -> Set AttributeContainer
+        classDomain    :: (?clazz :: ClassDescriptor) => entry -> Set AttributeContainer
         -- | get attribute value of entry by attribute name.
         attrByName     :: AttributeName -> entry -> AttributeContainer
 

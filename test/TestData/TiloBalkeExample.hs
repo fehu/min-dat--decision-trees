@@ -21,6 +21,7 @@ module TestData.TiloBalkeExample (
 
 , testData
 , expectedDecision
+, classname
 
 --, splitAge
 ) where
@@ -95,7 +96,7 @@ instance Attribute CreditRating where
 
 instance Attribute BuysComputer where
     possibleDiscreteDomains _ = [ [ [Yes], [No] ] ]
-    attributeName _ = AttrName "buys computer"
+    attributeName _ = AttrName classname
 
 instance D.Entry Entry where
     -- entry -> [AttributeContainer]
@@ -115,6 +116,7 @@ instance D.Entry Entry where
 
 newEntry age income student = Entry (Age age) (Income income) (Student student)
 
+classname = "buys computer"
 
 testData :: [Entry]
 testData = [

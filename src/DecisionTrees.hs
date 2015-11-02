@@ -90,6 +90,7 @@ classifyWithDecisionTree (Decision clazzMap _) _ = fst $ Map.findMax clazzMap
 --   The /test/ entries are used to assess tree's quality;
 --   failed examples are added to the /learning/ set and the process is rerun.
 buildDecisionTreeIterative :: (Eq entry, Entry entry, TreeBranching entry) =>
+                              (?clazz :: ClassDescriptor) =>
         [entry]     -- ^ learning entries
      -> [entry]     -- ^ test entries
      -> IO (Decision entry AttributeContainer)  -- ^ the decision tree
@@ -107,14 +108,14 @@ buildDecisionTreeIterative learnEntries testEntries = do
 -----------------------------------------------------------------------------
 -- | build a decision tree, based on the given entries,
 --   using the imported instance of 'TreeBranching'.
-buildDecisionTree :: (Entry entry, TreeBranching entry) =>
+buildDecisionTree :: (Entry entry, TreeBranching entry) => (?clazz :: ClassDescriptor) =>
     [entry] -> IO (Decision entry AttributeContainer)
 
 buildDecisionTree entries = buildDecisionTree' entries Set.empty Nothing
 
 
 
-buildDecisionTree' :: (Entry entry, TreeBranching entry) =>
+buildDecisionTree' :: (Entry entry, TreeBranching entry) => (?clazz :: ClassDescriptor) =>
     [entry] -> Set AttributeName -> Maybe String -> IO (Decision entry AttributeContainer)
 
 buildDecisionTree' entries ignore selDescr =

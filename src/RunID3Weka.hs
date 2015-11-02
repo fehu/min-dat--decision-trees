@@ -1,3 +1,5 @@
+{-# LANGUAGE FlexibleContexts, UndecidableInstances #-}
+
 -----------------------------------------------------------------------------
 --
 -- Module      :  RunID3Weka
@@ -13,11 +15,8 @@
 -----------------------------------------------------------------------------
 
 module RunID3Weka (
-  WekaVal(..)
-, WekaAttributeRepr(..)
-, GenericEntry(..)
 
-, run
+  run
 , runIterative
 , drawDecisionTree
 
@@ -28,7 +27,7 @@ import DecisionTrees.Definitions
 import DecisionTrees.TreeBranching
 import DecisionTrees.ID3
 import DecisionTrees.Utils
-import WekaData hiding (WekaVal, WekaEntry)
+import WekaData
 import WekaData.Show.Name
 
 
@@ -47,56 +46,44 @@ import qualified Data.Random.Extras as RE
 
 -----------------------------------------------------------------------------
 
+buildAttr attr = uncurry WVal . (const attr &&& id)
 
-data WekaVal = WekaNumVal Float
-             | WekaNomVal String
-             deriving (Typeable, Eq, Ord)
-
-instance Show WekaVal where
-    show (WekaNumVal f) = show f
-    show (WekaNomVal s) = show s
-
-
-data GenericEntry = GenericEntry (Map WekaDataAttribute WekaVal)
-                                 (WekaDataAttribute, WekaVal)
-                deriving (Show, Eq)
-
-
-newtype WekaAttributeRepr = WekaAttributeRepr (WekaDataAttribute, WekaVal)
-                          deriving (Typeable, Eq, Ord)
-
-instance Show WekaAttributeRepr where
-    show (WekaAttributeRepr (attr, val)) = show attr ++ "=" ++ show val
-
-
-buildAttr attr = WekaAttributeRepr . (const attr &&& WekaNomVal)
-mkAttr = Attr . WekaAttributeRepr
-
-instance Attribute WekaAttributeRepr where
+instance Attribute WekaVal where
  -- possibleDiscreteDomains :: attr -> [PossibleDiscreteDomain attr]
-    possibleDiscreteDomains (WekaAttributeRepr (attr@(WekaAttrNom _ domain), _)) =
+    possibleDiscreteDomains (WVal attr@(WekaAttrNom _ domain) _) =
         flists (buildAttr attr) fsubs
             where fsubs = fullSubsets . Set.fromList $ domain
                   fl f  = map f . Set.toList
                   flists f = fl (fl (fl f))
  -- attributeName :: attr -> AttributeName
-    attributeName (WekaAttributeRepr(attr, _)) = AttrName $ wekaAttributeName attr
+    attributeName (WVal attr _) = AttrName $ wekaAttributeName attr
 
 
-instance Entry GenericEntry where
+separateClass :: (?clazz :: ClassDescriptor) => WekaEntry -> (WekaVal, [WekaVal])
+separateClass e@(WEntry set) = maybe err f $ lookupWValInSet c set
+    where Class c = ?clazz
+          f = id &&& (Set.toList . (`Set.delete` set))
+          err = error $ "Class attribute '" ++ c ++ "' not found in " ++ show e
+
+instance Entry WekaEntry where
+
  -- listAttributes :: entry -> [AttributeContainer]
-    listAttributes (GenericEntry dta _) = map mkAttr $ Map.toAscList dta
+    listAttributes  = map Attr . snd . separateClass
+--    map mkAttr $ Map.toAscList dta
 
  -- getClass :: entry -> AttributeContainer
-    getClass (GenericEntry _ clazz) = mkAttr clazz
+    getClass = Attr . fst . separateClass
 
  -- classDomain :: entry -> Set AttributeContainer
-    classDomain (GenericEntry _ (attr@(WekaAttrNom _ domain), _)) =
-        Set.fromList . map (Attr . buildAttr attr) $ domain
+    classDomain = Set.fromList . f . fst . separateClass
+                where f (WVal attr@(WekaAttrNom _ domain) _) =
+                        map (Attr . WVal attr) domain
 
  -- attrByName :: AttributeName -> entry -> AttributeContainer
-    attrByName (AttrName name) (GenericEntry dta _) =
-        mkAttr $ findInMapWithAttr name dta
+    attrByName (AttrName name) e@(WEntry dta) =
+        maybe err Attr $ lookupWValInSet name dta
+        where err = error $ "Attribute '" ++ name
+                 ++ "' not found in " ++ show e
 
 
 
@@ -104,38 +91,38 @@ instance Entry GenericEntry where
 
 type Filename = String
 
-run :: Filename -> IO (Decision GenericEntry AttributeContainer)
-run filename = do entries <- getEntries filename
-                  buildDecisionTree entries
+run :: Filename -- ^ file name
+    -> String   -- ^ class name
+    -> IO (Decision WekaEntry AttributeContainer) -- ^ the decision tree
+run filename classname = do entries <- getEntries filename
+                            let ?clazz = Class classname
+                            buildDecisionTree entries
 
-
-mkEntry :: [WekaDataAttribute] -> [String] -> GenericEntry
-mkEntry attrs vals = GenericEntry vmap clazz
-    where vmap  = Map.fromList $ zip (init attrs) (map WekaNomVal $ init vals)
-          clazz = (last attrs, WekaNomVal $ last vals)
 
 getEntries filename = do
-    RawWekaData name attrs dta <- readWekaData filename
-    return $ map (mkEntry attrs) dta
+    raw@(RawWekaData name attrs dta) <- readWekaData filename
+    return $ wekaData2Sparse raw
 
 
 -----------------------------------------------------------------------------
 
 runIterative :: Filename    -- ^ file name
+             -> String      -- ^ class name
              -> Float       -- ^ the percent of /test/ entries
-             -> IO (Decision GenericEntry AttributeContainer) -- ^ the decision tree
+             -> IO (Decision WekaEntry AttributeContainer) -- ^ the decision tree
 
 
-runIterative filename testPercent = do
+runIterative filename classname testPercent = do
     entries <- getEntries filename
     let testEntriesCount = float2Int $ int2Float (length entries) * testPercent
     testEntries <- runRVar (RE.sample testEntriesCount entries) StdRandom
     let learnEntries = entries \\ testEntries
+    let ?clazz = Class classname
     buildDecisionTreeIterative learnEntries testEntries
 
 -----------------------------------------------------------------------------
 
-drawDecisionTree :: Decision GenericEntry AttributeContainer -> IO()
+drawDecisionTree :: Decision WekaEntry AttributeContainer -> IO()
 drawDecisionTree res = do let tr = decision2Tree show res
                           putStrLn $ Tree.drawTree tr
 

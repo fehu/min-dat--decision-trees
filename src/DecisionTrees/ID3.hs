@@ -110,7 +110,8 @@ instance (Entry entry) =>
                   sortSplit = sortBy (compare `on` (negate . snd . fst)) splitByGain
 
 
-countClasses :: (Entry entry) => [entry] -> [(AttributeContainer, Int)]
+countClasses :: (Entry entry) => (?clazz :: ClassDescriptor) =>
+                [entry] -> [(AttributeContainer, Int)]
 countClasses [] = []
 countClasses entries = sortBy (compare `on` fst) $ Map.assocs mp
     where entry = head entries

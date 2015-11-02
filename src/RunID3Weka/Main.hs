@@ -22,15 +22,15 @@ maybeReadInUnit s = (maybeRead s :: Maybe Float) >>= f
 
 parse ["-h"] = usage >> exitSuccess
 
-parse [fname] = do
-    res <- run fname
+parse [fname, clazz] = do
+    res <- run fname clazz
     putStrLn ""
     drawDecisionTree res
 
 
-parse [fname, "--iter", tp] = do
+parse [fname, clazz, "--iter", tp] = do
     let tperc  = fromMaybe tpError $ maybeReadInUnit tp
-    res <- runIterative fname tperc
+    res <- runIterative fname clazz tperc
     putStrLn ""
     drawDecisionTree res
 
@@ -39,8 +39,9 @@ parse _ = unknownCmd >> usage >> exitFailure
 
 unknownCmd = putStrLn "unknown command"
 
-usage = do putStrLn "Usage: ID3Weka [-h] file [--iter tp]"
-           putStrLn "       where file is an *.arff nominal data file" -- TODO: numerics!
-           putStrLn "             --iter tp - run in iterative mode with tp percent forming test set"
+usage = do putStrLn "Usage: ID3Weka [-h] file class [--iter p]\n"
+           putStrLn "       file   | *.arff nominal data file" -- TODO: numerics!
+           putStrLn "       class  | name of the class attribute"
+           putStrLn "     --iter p | run in iterative mode with 'p' percent forming test set"
 
 tpError = error "--iter argument must  must be a Float in [0, 1]"

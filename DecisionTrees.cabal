@@ -9,7 +9,7 @@ name:                DecisionTrees
 -- PVP summary:      +-+------- breaking API changes
 --                   | | +----- non-breaking API additions
 --                   | | | +--- code changes with no API change
-version:             0.2.0.0
+version:             0.2.1.0
 
 synopsis:            Decision Trees
 
@@ -39,6 +39,7 @@ library
   default-language:     Haskell2010
   default-extensions:   ExistentialQuantification
                         MultiParamTypeClasses
+                        ImplicitParams
   other-extensions:     FlexibleInstances
                         UndecidableInstances
                         DeriveDataTypeable
@@ -57,19 +58,23 @@ executable Example
 
 executable ID3Weka
     build-depends: DecisionTrees
-                 , WekaData >= 0.1.2.6
+                 , WekaData >= 0.2
                  , base >=4.7
                  , containers >= 0.5.5
                  , random-fu >= 0.2.6 && <= 0.2.7
                  , random-extras == 0.19
+
     hs-source-dirs: src
     main-is: RunID3Weka/Main.hs
     other-modules: RunID3Weka
+
     buildable: True
     default-language: Haskell2010
     default-extensions:   ExistentialQuantification
                           FlexibleInstances
                           DeriveDataTypeable
+                          MultiParamTypeClasses
+                          ImplicitParams
 
 
 test-suite tests
@@ -81,8 +86,10 @@ test-suite tests
     type: exitcode-stdio-1.0
     hs-source-dirs: test
     main-is: tests.hs
+
     buildable: True
     default-language: Haskell2010
+    default-extensions: ImplicitParams
     other-modules: TestData
                    TestData.TiloBalkeExample
                    AgeSpec

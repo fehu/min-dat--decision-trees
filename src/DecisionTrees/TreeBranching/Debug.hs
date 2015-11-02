@@ -24,6 +24,7 @@ import Data.Set (Set)
 class (TreeBranching entry) =>
     TreeBranchingDebug entry where
         -- | best attributes for splitting is descending order.
-        selectBestAttrSplitting' ::  [entry]      -- ^ select from
+        selectBestAttrSplitting' :: (?clazz :: ClassDescriptor) =>
+                               [entry]      -- ^ select from
                             -> Set AttributeName  -- ^ except given attributes
                             -> [(([AttrValSet], Float), [[(AttributeContainer, Int)]])] -- ^ sorted splitting

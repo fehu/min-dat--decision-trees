@@ -22,13 +22,14 @@ import Data.Set (Set)
 -- | An abstraction for building decision trees.
 class TreeBranching entry where
     -- | select best attributes splitting.
-    selectBestAttrSplitting :: [entry]               -- ^ select from
+    selectBestAttrSplitting :: (?clazz :: ClassDescriptor) =>
+                               [entry]               -- ^ select from
                             -> Set AttributeName     -- ^ except given attributes
                             -> ([AttrValSet], Float) -- ^ best splitting
     -- | group entries, based on the given 'AttrValSet's.
     splitEntries            :: [entry] -> [AttrValSet] -> [(AttrValSet, [entry])]
     -- | stop condition for branching.
-    finishedSplitting       :: [entry] -> Maybe [(AttributeContainer, Int)]
+    finishedSplitting       :: (?clazz :: ClassDescriptor) => [entry] -> Maybe [(AttributeContainer, Int)]
 
 
 

@@ -64,7 +64,8 @@ specFuncs = describe "DecisionTrees.ID3" $ do
 
 
 specExample :: Spec
-specExample = let x = do res <- buildDecisionTree testData
+specExample = let x = do let ?clazz = Class classname
+                         res <- buildDecisionTree testData
                          let h = describe "DecisionTrees.ID3" $
                                     context "given a precalculated example" $
                                         describe "must behave as the example given" $
