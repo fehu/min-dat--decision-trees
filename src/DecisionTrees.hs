@@ -68,6 +68,7 @@ type DecisionTree entity decision = Tree (Decision entity decision)
 listChildren :: Decision e d -> [Decision e d]
 listChildren (DecisionStep _ sel _ _) = Map.elems sel
 listChildren (Decision _ _)           = []
+listChildren (Undefined _)            = []
 
 -- | converts a 'Decision' into 'Data.Tree'
 decision2Tree f = unfoldTree (f &&& listChildren)
