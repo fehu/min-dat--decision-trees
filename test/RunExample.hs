@@ -12,7 +12,8 @@ import TestData.TiloBalkeExample
 import Data.Tree
 
 
-main = do let ?clazz = Class classname
+main = do let ?clazz  = Class classname
+          let ?config = FinishedSplittingThreshold 1.0
           x <- buildDecisionTree testData
           let tr = decision2Tree show x
           putStrLn ""

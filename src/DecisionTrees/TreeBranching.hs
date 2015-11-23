@@ -20,16 +20,20 @@ import Data.Set (Set)
 
 
 -- | An abstraction for building decision trees.
-class TreeBranching entry where
+class TreeBranching entry conf where
     -- | select best attributes splitting.
-    selectBestAttrSplitting :: (?clazz :: ClassDescriptor) =>
+    selectBestAttrSplitting :: ( ?clazz  :: ClassDescriptor
+                               , ?config :: conf ) =>
                                [entry]               -- ^ select from
                             -> Set AttributeName     -- ^ except given attributes
                             -> ([AttrValSet], Float) -- ^ best splitting
     -- | group entries, based on the given 'AttrValSet's.
-    splitEntries            :: [entry] -> [AttrValSet] -> [(AttrValSet, [entry])]
+    splitEntries            :: (?config :: conf) => [entry] -> [AttrValSet] -> [(AttrValSet, [entry])]
     -- | stop condition for branching.
-    finishedSplitting       :: (?clazz :: ClassDescriptor) => [entry] -> Maybe [(AttributeContainer, Int)]
+    finishedSplitting       :: ( ?clazz :: ClassDescriptor
+                               , ?config :: conf ) =>
+                               [entry]
+                            -> Maybe [(AttributeContainer, Int)]
 
 
 

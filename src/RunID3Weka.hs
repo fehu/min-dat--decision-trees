@@ -20,6 +20,8 @@ module RunID3Weka (
 , runIterative
 , drawDecisionTree
 
+, FinishedSplittingThreshold(..)
+
 ) where
 
 import DecisionTrees
@@ -94,10 +96,13 @@ type Filename = String
 
 run :: Filename -- ^ file name
     -> String   -- ^ class name
+    -> FinishedSplittingThreshold
     -> IO (Decision WekaEntry AttributeContainer) -- ^ the decision tree
-run filename classname = do entries <- getEntries filename
-                            let ?clazz = Class classname
-                            buildDecisionTree entries
+run filename classname fsThreshold =
+    do entries <- getEntries filename
+       let ?clazz = Class classname
+       let ?config = fsThreshold
+       buildDecisionTree entries
 
 
 getEntries filename = do
@@ -109,17 +114,20 @@ getEntries filename = do
 
 runIterative :: Filename    -- ^ file name
              -> String      -- ^ class name
+             -> FinishedSplittingThreshold
              -> Float       -- ^ the percent of /test/ entries
              -> IO (Decision WekaEntry AttributeContainer) -- ^ the decision tree
 
 
-runIterative filename classname testPercent = do
+runIterative filename classname fsThreshold testPercent = do
     entries <- getEntries filename
     let testEntriesCount = float2Int $ int2Float (length entries) * testPercent
     testEntries <- runRVar (RE.sample testEntriesCount entries) StdRandom
     let learnEntries = entries \\ testEntries
     let ?clazz = Class classname
+    let ?config = fsThreshold
     buildDecisionTreeIterative learnEntries testEntries
+    undefined
 
 -----------------------------------------------------------------------------
 
